@@ -43,4 +43,6 @@ type Conn interface {
 	SetDeadline(deadline time.Time) error
 	SetReadDeadline(deadline time.Time) error
 	SetWriteDeadline(deadline time.Time) error
+
 }
+

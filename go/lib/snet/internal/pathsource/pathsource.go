@@ -16,13 +16,16 @@ package pathsource
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/scionproto/scion/go/lib/addr"
 	"github.com/scionproto/scion/go/lib/common"
+	"github.com/scionproto/scion/go/lib/log"
 	"github.com/scionproto/scion/go/lib/overlay"
 	"github.com/scionproto/scion/go/lib/pathmgr"
+	"github.com/scionproto/scion/go/lib/pathpol"
 	"github.com/scionproto/scion/go/lib/sciond"
 	"github.com/scionproto/scion/go/lib/spath"
+	"github.com/scionproto/scion/go/lib/spath/spathmeta"
 )
 
 const (
@@ -30,16 +33,18 @@ const (
 	ErrNoPath     = "path not found"
 	ErrInitPath   = "raw forwarding path offsets could not be initialized"
 	ErrBadOverlay = "unable to extract next hop from sciond path entry"
-)
+	)
 
 // PathSource is a source of paths and overlay addresses for snet.
 type PathSource interface {
 	Get(ctx context.Context, src, dst addr.IA) (*overlay.OverlayAddr, *spath.Path, error)
+	GetFilter(ctx context.Context, src, dst addr.IA, policy *pathpol.Policy, key *spathmeta.PathKey) (*overlay.OverlayAddr, *spath.Path, error)
 }
 
 type pathSource struct {
 	resolver pathmgr.Resolver
 }
+
 
 // NewPathSource initializes a source of paths and overlay addresses for snet,
 // with information obtained from resolver. Passing in a nil resolver is
@@ -55,6 +60,7 @@ func (ps *pathSource) Get(ctx context.Context,
 		return nil, nil, common.NewBasicError(ErrNoResolver, nil)
 	}
 	paths := ps.resolver.Query(ctx, src, dst, sciond.PathReqFlags{})
+
 	sciondPath := paths.GetAppPath("")
 	if sciondPath == nil {
 		return nil, nil, common.NewBasicError(ErrNoPath, nil)
@@ -69,3 +75,34 @@ func (ps *pathSource) Get(ctx context.Context,
 	}
 	return overlayAddr, path, nil
 }
+func (ps *pathSource) GetFilter(ctx context.Context,
+	src, dst addr.IA, policy *pathpol.Policy, key *spathmeta.PathKey) (*overlay.OverlayAddr, *spath.Path, error) {
+
+	if ps.resolver == nil {
+		return nil, nil, common.NewBasicError(ErrNoResolver, nil)
+	}
+	paths := ps.resolver.QueryFilter(ctx, src, dst, policy)
+	for _, path := range paths {
+		log.Debug(fmt.Sprintf("Filtered paths: %s\n", path.Entry.Path.String()))
+	}
+	if len(paths) == 0 {
+		return nil, nil, common.NewBasicError("Could not find path to match policy", nil)
+	}
+	sciondPath := paths.GetAppPath("")
+	//log.Debug(fmt.Sprintf("Chosen path: %s\n", sciondPath.Entry.Path.String()))
+	log.Debug("Blah")
+	if sciondPath == nil {
+		return nil, nil, common.NewBasicError(ErrNoPath, nil)
+	}
+	path := &spath.Path{Raw: sciondPath.Entry.Path.FwdPath}
+	if err := path.InitOffsets(); err != nil {
+		return nil, nil, common.NewBasicError(ErrInitPath, nil)
+	}
+	overlayAddr, err := sciondPath.Entry.HostInfo.Overlay()
+	if err != nil {
+		return nil, nil, common.NewBasicError(ErrBadOverlay, nil)
+	}
+	return overlayAddr, path, nil
+}
+
+

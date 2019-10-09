@@ -96,6 +96,8 @@ func (c *scionConnWriter) write(b []byte, raddr *Addr) (int, error) {
 	return c.writeWithLock(b, raddr)
 }
 
+
+
 func (c *scionConnWriter) writeWithLock(b []byte, raddr *Addr) (int, error) {
 	c.mtx.Lock()
 	defer c.mtx.Unlock()
@@ -127,10 +129,8 @@ func (c *scionConnWriter) SetWriteDeadline(t time.Time) error {
 	return nil
 }
 
-// remoteAddressResolver validates the contents of a remote snet address,
-// taking into account both the remote address that might be present on a conn
-// object, and the remote address passed in as argument to WriteTo or
-// WriteToSCION.
+
+
 type remoteAddressResolver struct {
 	// localIA is the local AS. Path and overlay resolution differs between
 	// destinations residing in the local AS, and destinations residing in

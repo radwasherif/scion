@@ -72,5 +72,14 @@ __pycache__
 ##########################
 tags
 
+<<<<<<< HEAD
 # bazel artifacts
 /bazel-*
+=======
+# HSR
+##########################
+c/lib/hsr/build
+
+# GoLand generated files
+.idea/*
+>>>>>>> af64972... Added basic functionality to support path-aware applications:

@@ -33,6 +33,7 @@ package pathmgr
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/scionproto/scion/go/lib/addr"
@@ -156,7 +157,13 @@ func (r *resolver) Query(ctx context.Context, src, dst addr.IA,
 func (r *resolver) QueryFilter(ctx context.Context, src, dst addr.IA,
 	policy *pathpol.Policy) spathmeta.AppPathSet {
 
+
 	aps := r.Query(ctx, src, dst, sciond.PathReqFlags{})
+
+	for _, path := range aps {
+		log.Debug(fmt.Sprintf("Available paths: %s\n", path.Entry.Path.String()))
+	}
+
 	if policy == nil {
 		return aps
 	}
