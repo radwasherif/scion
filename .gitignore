@@ -80,3 +80,6 @@ tags
 # HSR
 ##########################
 c/lib/hsr/build
+
+# GoLand generated files
+.idea/*

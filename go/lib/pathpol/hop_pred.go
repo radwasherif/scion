@@ -124,7 +124,8 @@ func (hp *HopPredicate) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	hp, err = HopPredicateFromString(str)
+	h, err := HopPredicateFromString(str)
+	*hp = *h
 	return err
 }
 

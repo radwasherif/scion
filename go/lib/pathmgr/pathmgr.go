@@ -34,6 +34,7 @@ package pathmgr
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -149,6 +150,9 @@ func (r *resolver) QueryFilter(ctx context.Context, src, dst addr.IA,
 	policy *pathpol.Policy) spathmeta.AppPathSet {
 
 	aps := r.Query(ctx, src, dst)
+	for _, path := range aps {
+		log.Debug(fmt.Sprintf("Available paths: %s\n", path.Entry.Path.String()))
+	}
 	if policy == nil {
 		return aps
 	}

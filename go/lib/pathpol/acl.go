@@ -73,7 +73,7 @@ func (a *ACL) evalInterface(iface sciond.PathInterface, ingress bool) ACLAction 
 			return aclEntry.Action
 		}
 	}
-	panic("Default ACL action missing")
+	return Allow
 }
 
 type ACLEntry struct {
@@ -88,3 +88,15 @@ const (
 	Deny  ACLAction = false
 	Allow ACLAction = true
 )
+
+func (a *ACLAction) UnmarshalJSON (b []byte) error {
+	var s string
+	json.Unmarshal(b, &s)
+	switch s {
+	case "Deny": *a = Deny
+	case "Allow": *a = Allow
+	default:
+		return common.NewBasicError("Cannot marshal ACLAction", nil)
+	}
+	return nil
+}

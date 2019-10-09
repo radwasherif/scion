@@ -17,10 +17,9 @@ package squic
 
 import (
 	"crypto/tls"
-
 	"github.com/lucas-clemente/quic-go"
-
 	"github.com/scionproto/scion/go/lib/addr"
+	"github.com/scionproto/scion/go/lib/appconf"
 	"github.com/scionproto/scion/go/lib/common"
 	"github.com/scionproto/scion/go/lib/snet"
 )
@@ -34,6 +33,7 @@ var (
 	// Don't verify the server's cert, as we are not using the TLS PKI.
 	cliTlsCfg = &tls.Config{InsecureSkipVerify: true}
 	srvTlsCfg = &tls.Config{}
+	scionConn snet.Conn
 )
 
 func Init(keyPath, pemPath string) error {
@@ -95,3 +95,22 @@ func sListen(network *snet.SCIONNetwork, laddr, baddr *snet.Addr,
 	}
 	return network.ListenSCIONWithBindSVC("udp4", laddr, baddr, svc, 0)
 }
+
+func DialSCIONWithConf(network *snet.SCIONNetwork, laddr, raddr *snet.Addr,
+	quicConfig *quic.Config, conf *appconf.AppConf) (quic.Session, error) {
+
+	return DialSCIONWithBindSVCWithConf(network, laddr, raddr, nil, addr.SvcNone, quicConfig, conf)
+}
+
+func DialSCIONWithBindSVCWithConf(network *snet.SCIONNetwork, laddr, raddr, baddr *snet.Addr,
+	svc addr.HostSVC, quicConfig *quic.Config, conf *appconf.AppConf) (quic.Session, error) {
+
+	sconn, err := sListen(network, laddr, baddr, svc)
+	wrappedConn := snet.NewConnWrapper(sconn, conf)
+	if err != nil {
+		return nil, err
+	}
+	// Use dummy hostname, as it's used for SNI, and we're not doing cert verification.
+	return quic.Dial(wrappedConn, raddr, "host:0", cliTlsCfg, quicConfig)
+}
+
