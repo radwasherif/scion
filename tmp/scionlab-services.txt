@@ -1,0 +1,6 @@
+scion-border-router@17-ffaa_1_cdc-1.service
+scion-certificate-server@17-ffaa_1_cdc-1.service
+scion-path-server@17-ffaa_1_cdc-1.service
+scion-beacon-server@17-ffaa_1_cdc-1.service
+scion-daemon@17-ffaa_1_cdc.service
+scion-dispatcher.service

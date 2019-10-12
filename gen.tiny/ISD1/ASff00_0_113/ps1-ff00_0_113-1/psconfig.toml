@@ -1,0 +1,25 @@
+[infra]
+Type = "PS"
+
+[general]
+ReconnectToDispatcher = true
+ID = "ps1-ff00_0_113-1"
+ConfigDir = "gen/ISD1/ASff00_0_113/ps1-ff00_0_113-1"
+
+[TrustDB]
+Backend = "sqlite"
+Connection = "gen-cache/ps1-ff00_0_113-1.trust.db"
+
+[ps]
+SegSync = true
+
+[logging.file]
+Level = "debug"
+Path = "logs/ps1-ff00_0_113-1.log"
+
+[logging.console]
+Level = "crit"
+
+[ps.PathDB]
+Backend = "sqlite"
+Connection = "gen-cache/ps1-ff00_0_113-1.path.db"

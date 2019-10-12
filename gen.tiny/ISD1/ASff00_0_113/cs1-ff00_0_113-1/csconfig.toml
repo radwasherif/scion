@@ -1,0 +1,26 @@
+[sd_client]
+Path = "/run/shm/sciond/sd1-ff00_0_113.sock"
+
+[TrustDB]
+Backend = "sqlite"
+Connection = "gen-cache/cs1-ff00_0_113-1.trust.db"
+
+[cs]
+LeafReissueTime = "6h"
+ReissueRate = "10s"
+ReissueTimeout = "5s"
+IssuerReissueTime = "3d"
+
+[general]
+ID = "cs1-ff00_0_113-1"
+ConfigDir = "gen/ISD1/ASff00_0_113/cs1-ff00_0_113-1"
+
+[infra]
+Type = "CS"
+
+[logging.file]
+Level = "debug"
+Path = "logs/cs1-ff00_0_113-1.log"
+
+[logging.console]
+Level = "crit"

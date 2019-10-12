@@ -1,0 +1,23 @@
+[sd]
+Reliable = "/run/shm/sciond/sd1-ff00_0_113.sock"
+Unix = "/run/shm/sciond/sd1-ff00_0_113.unix"
+Public = "1-ff00:0:113,[127.0.0.1]:0"
+
+[general]
+ReconnectToDispatcher = true
+ID = "sd1-ff00_0_113"
+ConfigDir = "gen/ISD1/ASff00_0_113/endhost"
+
+[TrustDB]
+Backend = "sqlite"
+Connection = "gen-cache/sd1-ff00_0_113.trust.db"
+
+[logging.file]
+Level = "debug"
+Path = "logs/sd1-ff00_0_113.log"
+
+[logging.console]
+Level = "crit"
+
+[sd.PathDB]
+Connection = "gen-cache/sd1-ff00_0_113.path.db"

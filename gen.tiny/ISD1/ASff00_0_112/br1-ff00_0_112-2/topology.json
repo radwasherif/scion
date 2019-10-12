@@ -1,0 +1,121 @@
+{
+  "Overlay": "UDP/IPv4",
+  "MTU": 1472,
+  "BorderRouters": {
+    "br1-ff00_0_112-1": {
+      "CtrlAddr": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.33",
+            "L4Port": 31024
+          }
+        }
+      },
+      "InternalAddrs": {
+        "IPv4": {
+          "PublicOverlay": {
+            "Addr": "127.0.0.33",
+            "OverlayPort": 31025
+          }
+        }
+      },
+      "Interfaces": {
+        "1": {
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-ff00:0:110",
+          "RemoteOverlay": {
+            "Addr": "127.0.0.6",
+            "OverlayPort": 50000
+          },
+          "LinkTo": "PARENT",
+          "MTU": 1472,
+          "Bandwidth": 500,
+          "PublicOverlay": {
+            "Addr": "127.0.0.7",
+            "OverlayPort": 50000
+          }
+        }
+      }
+    },
+    "br1-ff00_0_112-2": {
+      "CtrlAddr": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.34",
+            "L4Port": 31026
+          }
+        }
+      },
+      "InternalAddrs": {
+        "IPv4": {
+          "PublicOverlay": {
+            "Addr": "127.0.0.34",
+            "OverlayPort": 31027
+          }
+        }
+      },
+      "Interfaces": {
+        "2": {
+          "Overlay": "UDP/IPv4",
+          "ISD_AS": "1-ff00:0:113",
+          "RemoteOverlay": {
+            "Addr": "127.0.0.11",
+            "OverlayPort": 50000
+          },
+          "LinkTo": "CHILD",
+          "MTU": 1472,
+          "Bandwidth": 500,
+          "PublicOverlay": {
+            "Addr": "127.0.0.10",
+            "OverlayPort": 50000
+          }
+        }
+      }
+    }
+  },
+  "ZookeeperService": {
+    "1": {
+      "Addr": "127.0.0.1",
+      "L4Port": 2181
+    }
+  },
+  "BeaconService": {
+    "bs1-ff00_0_112-1": {
+      "Addrs": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.35",
+            "L4Port": 31021
+          }
+        }
+      }
+    }
+  },
+  "CertificateService": {
+    "cs1-ff00_0_112-1": {
+      "Addrs": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.36",
+            "L4Port": 31022
+          }
+        }
+      }
+    }
+  },
+  "PathService": {
+    "ps1-ff00_0_112-1": {
+      "Addrs": {
+        "IPv4": {
+          "Public": {
+            "Addr": "127.0.0.37",
+            "L4Port": 31023
+          }
+        }
+      }
+    }
+  },
+  "Core": false,
+  "DiscoveryService": {},
+  "ISD_AS": "1-ff00:0:112"
+}

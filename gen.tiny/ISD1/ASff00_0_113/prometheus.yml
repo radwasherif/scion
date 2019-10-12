@@ -1,0 +1,22 @@
+global:
+  evaluation_interval: 15s
+  external_labels:
+    monitor: scion-monitor
+  scrape_interval: 5s
+scrape_configs:
+- file_sd_configs:
+  - files:
+    - gen/ISD1/ASff00_0_113/prometheus/cs.yml
+  job_name: CS
+- file_sd_configs:
+  - files:
+    - gen/ISD1/ASff00_0_113/prometheus/br.yml
+  job_name: BR
+- file_sd_configs:
+  - files:
+    - gen/ISD1/ASff00_0_113/prometheus/bs.yml
+  job_name: BS
+- file_sd_configs:
+  - files:
+    - gen/ISD1/ASff00_0_113/prometheus/ps.yml
+  job_name: PS
