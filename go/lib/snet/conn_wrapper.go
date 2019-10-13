@@ -13,13 +13,20 @@ import (
 	"github.com/scionproto/scion/go/lib/spath/spathmeta"
 )
 
+const (
+	ErrInitPath = "raw forwarding path offsets could not be initialized"
+)
+
 var _ net.PacketConn = (*ConnWrapper)(nil)
 var _ net.Conn = (*ConnWrapper)(nil)
 var _ Conn = (*ConnWrapper)(nil)
 
 type ConnWrapper struct {
-	conn *SCIONConn
-	conf *appconf.AppConf
+	conn         *SCIONConn
+	conf         *appconf.AppConf
+	pathMap      spathmeta.AppPathSet
+	pathKeys     []spathmeta.PathKey
+	nextKeyIndex int
 }
 
 func NewConnWrapper(c Conn, conf *appconf.AppConf) *ConnWrapper {
@@ -59,7 +66,6 @@ func (c *ConnWrapper) WriteToSCION(b []byte, address *Addr) (int, error) {
 func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 	resolver := c.conn.resolver.pathResolver
 	localIA := c.conn.resolver.localIA
-	var key spathmeta.PathKey = ""
 	remoteAddr := address.Copy()
 	var nextHop *overlay.OverlayAddr
 	var path *spath.Path
@@ -69,7 +75,7 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 		staticNextHop, staticPath := c.conf.GetStaticPath()
 		//if we're using a static path, query resolver only if this is the first call to write
 		if staticNextHop == nil && staticPath == nil {
-			nextHop, path, err = resolver.GetFilter(context.Background(), localIA, address.IA, c.conf.Policy(), &key)
+			nextHop, path, err = resolver.GetFilter(context.Background(), localIA, address.IA, c.conf.Policy())
 			if err != nil {
 				return 0, common.NewBasicError("Writer: Error resolving address: ", err)
 			}
@@ -77,14 +83,45 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 		} else if staticNextHop != nil && staticPath != nil {
 			nextHop, path = staticNextHop, staticPath
 		} else {
-			return 0, common.NewBasicError("Next hop and path must both be either defined or undefine", nil)
+			return 0, common.NewBasicError("Next hop and path must both be either defined or undefined", nil)
 		}
 
 	} else if c.conf.PathSelection().IsArbitrary() {
-		nextHop, path, err = resolver.GetFilter(context.Background(), localIA, address.IA, c.conf.Policy(), &key)
+		nextHop, path, err = resolver.GetFilter(context.Background(), localIA, address.IA, c.conf.Policy())
 		if err != nil {
 			return 0, common.NewBasicError("Writer: Error resolving address: ", err)
 		}
+	} else if c.conf.PathSelection().IsRoundRobin() {
+		if len(c.pathKeys) == 0 {
+			c.pathMap, err = resolver.GetSetFilter(context.Background(), localIA, address.IA, c.conf.Policy())
+			if err != nil {
+				return 0, common.NewBasicError("Writer: Error resolving address: ", err)
+			}
+			for k, _ := range c.pathMap {
+				c.pathKeys = append(c.pathKeys, k)
+			}
+		}
+
+		//sanity checks
+		if c.nextKeyIndex >= len(c.pathKeys) || len(c.pathKeys) != len(c.pathMap) {
+			return 0, common.NewBasicError("Writer: inconsistent path keys array/map length", err)
+		}
+
+		sciondPath, ok := c.pathMap[c.pathKeys[c.nextKeyIndex]]
+		if !ok {
+			return 0, common.NewBasicError("Writer: Path key not found", nil)
+		}
+		c.nextKeyIndex = (c.nextKeyIndex + 1) % len(c.pathKeys)
+
+		path = &spath.Path{Raw: sciondPath.Entry.Path.FwdPath}
+		if err := path.InitOffsets(); err != nil {
+			return 0, common.NewBasicError(ErrInitPath, nil)
+		}
+		nextHop, err = sciondPath.Entry.HostInfo.Overlay()
+		if err != nil {
+			return 0, common.NewBasicError(ErrBadOverlay, nil)
+		}
+
 	} else {
 		return 0, common.NewBasicError("Path selection option not yet supported", nil)
 	}

@@ -39,7 +39,8 @@ const (
 // PathSource is a source of paths and overlay addresses for snet.
 type PathSource interface {
 	Get(ctx context.Context, src, dst addr.IA) (*overlay.OverlayAddr, *spath.Path, error)
-	GetFilter(ctx context.Context, src, dst addr.IA, policy *pathpol.Policy, key *spathmeta.PathKey) (*overlay.OverlayAddr, *spath.Path, error)
+	GetFilter(ctx context.Context, src, dst addr.IA, policy *pathpol.Policy) (*overlay.OverlayAddr, *spath.Path, error)
+	GetSetFilter(ctx context.Context, src, dst addr.IA, policy *pathpol.Policy) (spathmeta.AppPathSet, error)
 }
 
 type pathSource struct {
@@ -76,24 +77,28 @@ func (ps *pathSource) Get(ctx context.Context,
 	return overlayAddr, path, nil
 }
 func (ps *pathSource) GetFilter(ctx context.Context,
-	src, dst addr.IA, policy *pathpol.Policy, key *spathmeta.PathKey) (*overlay.OverlayAddr, *spath.Path, error) {
+	src, dst addr.IA, policy *pathpol.Policy) (*overlay.OverlayAddr, *spath.Path, error) {
 
 	if ps.resolver == nil {
 		return nil, nil, common.NewBasicError(ErrNoResolver, nil)
 	}
 	paths := ps.resolver.QueryFilter(ctx, src, dst, policy)
-	for _, path := range paths {
-		log.Debug(fmt.Sprintf("Filtered paths: %s\n", path.Entry.Path.String()))
-	}
 	if len(paths) == 0 {
 		return nil, nil, common.NewBasicError("Could not find path to match policy", nil)
 	}
+
+	log.Debug("FILTERED PATHS: ")
+
+	for _, path := range paths {
+		log.Debug(path.Entry.Path.String() + "\n")
+	}
+
 	sciondPath := paths.GetAppPath("")
-	//log.Debug(fmt.Sprintf("Chosen path: %s\n", sciondPath.Entry.Path.String()))
-	log.Debug("Blah")
 	if sciondPath == nil {
 		return nil, nil, common.NewBasicError(ErrNoPath, nil)
 	}
+	log.Debug(fmt.Sprintf("SELECTED PATH: %s\n", sciondPath.Entry.Path.String()))
+
 	path := &spath.Path{Raw: sciondPath.Entry.Path.FwdPath}
 	if err := path.InitOffsets(); err != nil {
 		return nil, nil, common.NewBasicError(ErrInitPath, nil)
@@ -103,4 +108,23 @@ func (ps *pathSource) GetFilter(ctx context.Context,
 		return nil, nil, common.NewBasicError(ErrBadOverlay, nil)
 	}
 	return overlayAddr, path, nil
+}
+
+func (ps *pathSource) GetSetFilter(ctx context.Context,
+	src, dst addr.IA, policy *pathpol.Policy) (spathmeta.AppPathSet, error) {
+
+	if ps.resolver == nil {
+		return nil, common.NewBasicError(ErrNoResolver, nil)
+	}
+	paths := ps.resolver.QueryFilter(ctx, src, dst, policy)
+	if len(paths) == 0 {
+		return nil, common.NewBasicError("Could not find path to match policy", nil)
+	}
+
+	log.Debug("FILTERED PATHS: ")
+
+	for _, path := range paths {
+		log.Debug(path.Entry.Path.String() + "\n")
+	}
+	return paths, nil
 }
