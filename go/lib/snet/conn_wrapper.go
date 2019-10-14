@@ -2,9 +2,11 @@ package snet
 
 import (
 	"context"
+	"fmt"
 	"github.com/scionproto/scion/go/lib/addr"
 	"github.com/scionproto/scion/go/lib/appconf"
 	"github.com/scionproto/scion/go/lib/common"
+	"github.com/scionproto/scion/go/lib/log"
 	"github.com/scionproto/scion/go/lib/overlay"
 	"github.com/scionproto/scion/go/lib/spath"
 	"github.com/scionproto/scion/go/lib/spath/spathmeta"
@@ -71,6 +73,7 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 	var err error
 	//resolver called with empty context and not timeout enforcement for now
 	if c.conf.PathSelection().IsStatic() {
+		log.Debug("STATIC PATH ===> ")
 		staticNextHop , staticPath := c.conf.GetStaticPath()
 		//if we're using a static path, query resolver only if this is the first call to write
 		if  staticNextHop == nil && staticPath == nil {
@@ -86,11 +89,13 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 		}
 
 	} else if c.conf.PathSelection().IsArbitrary() {
+		log.Debug("ARBITRARY PATH ===> ")
 		nextHop, path, err = resolver.GetFilter(context.Background(), localIA, address.IA, c.conf.Policy())
 		if err != nil {
 			return 0, common.NewBasicError("Writer: Error resolving address: ", err)
 		}
 	} else if c.conf.PathSelection().IsRoundRobin() {
+		log.Debug("ROUND ROBIN ===> ")
 		if len(c.pathKeys) == 0 {
 			c.pathMap, err = resolver.GetSetFilter(context.Background(), localIA, address.IA, c.conf.Policy())
 			if err != nil {
@@ -107,6 +112,7 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 		}
 
 		sciondPath, ok := c.pathMap[c.pathKeys[c.nextKeyIndex]]
+		log.Debug(fmt.Sprintf("SELECTED PATH: %s\n", sciondPath.Entry.Path.String()))
 		if !ok {
 			return 0, common.NewBasicError("Writer: Path key not found", nil )
 		}
