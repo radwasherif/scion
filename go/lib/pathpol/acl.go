@@ -18,6 +18,7 @@ package pathpol
 import (
 	"encoding/json"
 	"errors"
+	"github.com/scionproto/scion/bazel-scion/external/go_sdk/src/fmt"
 	"strings"
 
 	"github.com/scionproto/scion/go/lib/common"
@@ -60,6 +61,7 @@ func (a *ACL) MarshalJSON() ([]byte, error) {
 }
 
 func (a *ACL) UnmarshalJSON(b []byte) error {
+	fmt.Println("ACL UnMarshal... %s", string(b))
 	return json.Unmarshal(b, &a.Entries)
 }
 
@@ -147,14 +149,17 @@ const (
 	allowSymbol string    = "+"
 )
 
-func (a *ACLAction) UnmarshalJSON (b []byte) error {
-	var s string
-	json.Unmarshal(b, &s)
-	switch s {
-	case "Deny": *a = Deny
-	case "Allow": *a = Allow
-	default:
-		return common.NewBasicError("Cannot marshal ACLAction", nil)
-	}
-	return nil
-}
+//func (a *ACLAction) UnmarshalJSON (b []byte) error {
+//	var s string
+//	err := json.Unmarshal(b, &s)
+//	if err != nil {
+//		return common.NewBasicError("Cannot unmarshal into string object " + string(b), nil)
+//	}
+//	switch s {
+//	case "Deny": *a = Deny
+//	case "Allow": *a = Allow
+//	default:
+//		return common.NewBasicError("Cannot marshal ACLAction", nil)
+//	}
+//	return nil
+//}
