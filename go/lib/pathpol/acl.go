@@ -18,7 +18,6 @@ package pathpol
 import (
 	"encoding/json"
 	"errors"
-	"github.com/scionproto/scion/bazel-scion/external/go_sdk/src/fmt"
 	"strings"
 
 	"github.com/scionproto/scion/go/lib/common"
@@ -61,7 +60,6 @@ func (a *ACL) MarshalJSON() ([]byte, error) {
 }
 
 func (a *ACL) UnmarshalJSON(b []byte) error {
-	fmt.Println("ACL UnMarshal... %s", string(b))
 	return json.Unmarshal(b, &a.Entries)
 }
 
