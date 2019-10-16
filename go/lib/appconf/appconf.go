@@ -15,6 +15,7 @@ type AppConf struct {
 	pathSelection PathSelection
 	staticPath *spath.Path
 	staticNextHop *overlay.OverlayAddr
+	Test int
 }
 
 func NewAppConf(policy *pathpol.Policy, pathSelection string) (*AppConf, error) {

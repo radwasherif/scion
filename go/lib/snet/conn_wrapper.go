@@ -71,18 +71,24 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 	var nextHop *overlay.OverlayAddr
 	var path *spath.Path
 	var err error
+	log.Debug(fmt.Sprintf("CONF TEST VAL = %i"), c.conf.Test)
+	c.conf.Test += 1
 	//resolver called with empty context and not timeout enforcement for now
 	if c.conf.PathSelection().IsStatic() {
 		log.Debug("STATIC PATH ===> ")
 		staticNextHop , staticPath := c.conf.GetStaticPath()
 		//if we're using a static path, query resolver only if this is the first call to write
 		if  staticNextHop == nil && staticPath == nil {
+			log.Debug("Querying Resolver - First Time")
 			nextHop, path, err = resolver.GetFilter(context.Background(), localIA, address.IA, c.conf.Policy())
 			if err != nil {
 				return 0, common.NewBasicError("Writer: Error resolving address: ", err)
 			}
 			c.conf.SetStaticPath(nextHop, path)
+			_, pathTest := c.conf.GetStaticPath()
+			log.Debug(fmt.Sprintf("Retrieved Path Test: %s", pathTest.Raw.String() == path.Raw.String()))
 		} else if staticNextHop != nil && staticPath != nil {
+			log.Debug("FOUND OLD PATHS")
 			nextHop, path = staticNextHop, staticPath
 		} else {
 			return 0, common.NewBasicError("Next hop and path must both be either defined or undefined", nil)
