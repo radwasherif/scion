@@ -71,7 +71,7 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 	var nextHop *overlay.OverlayAddr
 	var path *spath.Path
 	var err error
-	log.Debug(fmt.Sprintf("CONF TEST VAL = %i"), c.conf.Test)
+	log.Debug(fmt.Sprintf("CONF TEST VAL = %d", c.conf.Test))
 	c.conf.Test += 1
 	//resolver called with empty context and not timeout enforcement for now
 	if c.conf.PathSelection().IsStatic() {
@@ -86,7 +86,7 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 			}
 			c.conf.SetStaticPath(nextHop, path)
 			_, pathTest := c.conf.GetStaticPath()
-			log.Debug(fmt.Sprintf("Retrieved Path Test: %s", pathTest.Raw.String() == path.Raw.String()))
+			log.Debug(fmt.Sprintf("Retrieved Path Test: %t", pathTest.Raw.String() == path.Raw.String()))
 		} else if staticNextHop != nil && staticPath != nil {
 			log.Debug("FOUND OLD PATHS")
 			nextHop, path = staticNextHop, staticPath

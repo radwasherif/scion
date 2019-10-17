@@ -29,19 +29,19 @@ func NewAppConf(policy *pathpol.Policy, pathSelection string) (*AppConf, error) 
 	}, nil
 }
 
-func (c AppConf) PathSelection() PathSelection {
+func (c *AppConf) PathSelection() PathSelection {
 	return c.pathSelection
 }
 
-func (c AppConf) Policy () *pathpol.Policy {
+func (c *AppConf) Policy () *pathpol.Policy {
 	return c.policy
 }
 
-func (c AppConf) SetStaticPath (nh *overlay.OverlayAddr, sp *spath.Path)  {
-	c.staticNextHop, c.staticPath = nh, sp;
+func (c *AppConf) SetStaticPath (nh *overlay.OverlayAddr, sp *spath.Path)  {
+	c.staticNextHop, c.staticPath = nh, sp
 }
 
-func (c AppConf) GetStaticPath () (*overlay.OverlayAddr, *spath.Path) {
+func (c *AppConf) GetStaticPath () (*overlay.OverlayAddr, *spath.Path) {
 	assert.Must(c.pathSelection.IsStatic(), "Must not access static path while path selection is not static")
 	return c.staticNextHop, c.staticPath
 }
