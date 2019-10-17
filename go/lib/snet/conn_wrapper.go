@@ -88,8 +88,8 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 			_, pathTest := c.conf.GetStaticPath()
 			log.Debug(fmt.Sprintf("Retrieved Path Test: %t", pathTest.Raw.String() == path.Raw.String()))
 		} else if staticNextHop != nil && staticPath != nil {
-			log.Debug("FOUND OLD PATHS")
 			nextHop, path = staticNextHop, staticPath
+			log.Debug("FOUND OLD PATH: %v", staticPath)
 		} else {
 			return 0, common.NewBasicError("Next hop and path must both be either defined or undefined", nil)
 		}
@@ -118,7 +118,7 @@ func (c *ConnWrapper) write(b []byte, address *Addr) (int, error) {
 		}
 
 		sciondPath, ok := c.pathMap[c.pathKeys[c.nextKeyIndex]]
-		log.Debug(fmt.Sprintf("SELECTED PATH: %s\n", sciondPath.Entry.Path.String()))
+		log.Debug(fmt.Sprintf("SELECTED PATH # %d: %s\n", c.nextKeyIndex, sciondPath.Entry.Path.String()))
 		if !ok {
 			return 0, common.NewBasicError("Writer: Path key not found", nil )
 		}

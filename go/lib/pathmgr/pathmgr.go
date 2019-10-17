@@ -159,7 +159,7 @@ func (r *resolver) QueryFilter(ctx context.Context, src, dst addr.IA,
 
 
 	aps := r.Query(ctx, src, dst, sciond.PathReqFlags{})
-
+	log.Debug("AVAILABLE PATHS: ")
 	for _, path := range aps {
 		log.Debug(fmt.Sprintf("Available paths: %s\n", path.Entry.Path.String()))
 	}
