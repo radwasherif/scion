@@ -171,7 +171,7 @@ func TestExtensionSerializeTo(t *testing.T) {
 			b := gopacket.NewSerializeBuffer()
 			err := test.Extension.SerializeTo(b, test.SerializeOptions)
 			test.ErrorAssertion(t, err)
-			assert.Equal(t, test.ExpectedBytes, b.Bytes(), "buffer must match")
+			assert.Equal(t, test.ExpectedBytes, b.Bytes(), "Buffer must match")
 			assert.Equal(t, test.ExpectedLength, test.Extension.NumLines,
 				"updated length field must match")
 		})

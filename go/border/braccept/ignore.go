@@ -29,9 +29,9 @@ func IgnorePkts() {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30041 Dst=30041
-		SCION: NextHdr=UDP SrcType=IPv4 DstType=SVC
+		SCION: nextHdr=UDP SrcType=IPv4 DstType=SVC
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.101 DstIA=1-ff00:0:1 Dst=BS_M
 		UDP_1: Src=20001 Dst=0
 		IFStateReq:

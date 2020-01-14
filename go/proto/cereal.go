@@ -70,7 +70,7 @@ func PackRoot(c Cerealizable) (common.RawBytes, error) {
 	return raw, nil
 }
 
-// SerializeTo writes a Cerealizable object to an io.Writer.
+// Serialize writes a Cerealizable object to an io.Writer.
 func SerializeTo(c Cerealizable, wr io.Writer) error {
 	msg, err := cerealInsert(c)
 	if err != nil {

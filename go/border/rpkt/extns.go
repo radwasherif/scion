@@ -164,7 +164,7 @@ func (rp *RtrPkt) extnWriteExtension(e common.Extension, isHBH bool) (int, int, 
 			"Class", e.Class(), "Type", e.Type(), "lineLen", common.LineLen, "actual", eLen)
 	}
 	et := e.Type()
-	// Set the preceding NextHdr field, whether it's in the common header,
+	// Set the preceding nextHdr field, whether it's in the common header,
 	// preceding hop-by-hop or end-to-end extension.
 	*nextHdr = uint8(et.Class)
 	// Write extension sub-header into buffer

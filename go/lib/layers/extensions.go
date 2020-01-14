@@ -16,6 +16,7 @@ package layers
 
 import (
 	"fmt"
+	"github.com/scionproto/scion/go/lib/spse"
 
 	"github.com/scionproto/scion/go/lib/common"
 )
@@ -283,6 +284,27 @@ func ExtensionDataToExtensionLayer(nextHdr common.L4ProtocolType,
 	return &Extension{
 		NextHeader: nextHdr,
 		Type:       data.Type().Type,
+		Class:      data.Type().Class,
 		Data:       bytes,
+	}, nil
+}
+
+func ExtensionDataToSPSELayer(nextHdr common.L4ProtocolType,
+	extn spse.Extn) (*SPSE, error) {
+	bytes, err := extn.Pack()
+	authStartOffset := spse.SecModeLength + len(extn.Metadata)
+	authEndOffset := authStartOffset + len(extn.Authenticator)
+	if err != nil {
+		return nil, err
+	}
+	return &SPSE{
+		Extension: &Extension{
+			NextHeader: nextHdr,
+			Type:       extn.Type().Type,
+			Class:      extn.Type().Class,
+			Data:       bytes,
+		},
+		AuthStartOffset: authStartOffset,
+		AuthEndOffset:   authEndOffset,
 	}, nil
 }

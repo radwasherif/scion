@@ -237,7 +237,7 @@ func (p *parseCtx) DefaultL4Parser() error {
 			return common.NewBasicError("Unable to parse SCMP header", err)
 		}
 	default:
-		return common.NewBasicError("Unsupported NextHdr value", nil,
+		return common.NewBasicError("Unsupported nextHdr value", nil,
 			"expected", common.L4UDP, "actual", p.nextHdr)
 	}
 	p.offset += p.s.L4.L4Len()

@@ -163,7 +163,7 @@ func (scn *ScionTaggedLayer) updateCommon(kvs propMap) {
 			scn.CmnHdr.CurrInfoF = uint8(StrToInt(v))
 		case "CurrHopF":
 			scn.CmnHdr.CurrHopF = uint8(StrToInt(v))
-		case "NextHdr":
+		case "nextHdr":
 			scn.CmnHdr.NextHdr = parseScionProto(v)
 		default:
 			panic(fmt.Errorf("Error parsing common hdr fields '%s'", k))
