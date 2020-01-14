@@ -29,6 +29,7 @@ import (
 	"bytes"
 	"fmt"
 
+	"github.com/aead/cmac/aes"
 	"github.com/scionproto/scion/go/lib/common"
 )
 
@@ -47,6 +48,8 @@ type Extn struct {
 	Metadata common.RawBytes
 	// Authenticator contains the authenticator required by the security mode.
 	Authenticator common.RawBytes
+	// Key contains the key used for authentication
+	Key common.RawBytes
 }
 
 const (
@@ -207,4 +210,27 @@ func (s *Extn) String() string {
 	fmt.Fprintf(buf, " Metadata: %s", s.Metadata)
 	fmt.Fprintf(buf, " Authenticator: %s", s.Authenticator)
 	return buf.String()
+}
+
+func (s *Extn) Sum(b common.RawBytes) error {
+	h, err := aes.New(s.Key)
+	if err != nil {
+		return err
+	}
+	err = s.SetAuthenticator(h.Sum(b))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Extn) Verify(b common.RawBytes) (bool, error) {
+	h, err := aes.New(s.Key)
+	if err != nil {
+		return false, err
+	}
+
+	mac := h.Sum(b)
+
+	return bytes.Equal(s.Authenticator, mac), nil
 }

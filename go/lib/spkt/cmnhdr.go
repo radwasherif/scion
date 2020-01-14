@@ -30,14 +30,15 @@ const (
 )
 
 type CmnHdr struct {
-	Ver       uint8
-	DstType   addr.HostAddrType
-	SrcType   addr.HostAddrType
-	TotalLen  uint16
-	HdrLen    uint8
-	CurrInfoF uint8
-	CurrHopF  uint8
-	NextHdr   common.L4ProtocolType
+	Ver                uint8
+	DstType            addr.HostAddrType
+	SrcType            addr.HostAddrType
+	TotalLen           uint16
+	HdrLen             uint8
+	CurrInfoF          uint8
+	CurrHopF           uint8
+	NextHdr            common.L4ProtocolType
+	AuthenticatedBytes common.RawBytes
 }
 
 // ErrUnsupportedVersion indicates an unsupported SCION version.
@@ -97,6 +98,11 @@ func (c *CmnHdr) Write(b []byte) {
 	b[offset] = c.CurrHopF
 	offset += 1
 	b[offset] = uint8(c.NextHdr)
+
+	//Save bytes needed for authenticated
+	c.AuthenticatedBytes = make([]byte, 3)
+	common.Order.PutUint16(c.AuthenticatedBytes[:2], verDstSrc)
+
 }
 
 func (c *CmnHdr) UpdatePathOffsets(b []byte, iOff, hOff uint8) {
@@ -120,7 +126,7 @@ func (c *CmnHdr) HopFOffBytes() int {
 
 func (c CmnHdr) String() string {
 	return fmt.Sprintf(
-		"Ver:%d Dst:%s Src:%s TotalLen:%dB HdrLen: %d CurrInfoF:%d CurrHopF:%d NextHdr:%s",
+		"Ver:%d Dst:%s Src:%s TotalLen:%dB HdrLen: %d CurrInfoF:%d CurrHopF:%d nextHdr:%s",
 		c.Ver, c.DstType, c.SrcType, c.TotalLen, c.HdrLen, c.CurrInfoF, c.CurrHopF, c.NextHdr,
 	)
 }
