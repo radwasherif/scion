@@ -2,51 +2,50 @@
 
 set -e
 
-export BASE=".buildkite"
-STEPS="$BASE/steps"
-TRIGGERS="$BASE/triggers"
+# gen_acceptance generates all the acceptance steps.
+gen_acceptance() {
+    for test in ./acceptance/*_acceptance; do
+        name="$(basename ${test%_acceptance})"
+        echo "  - label: \"Acceptance: $name\""
+        echo "    command:"
+        echo "      - ./acceptance/ctl gsetup"
+        echo "      - ./acceptance/ctl grun $name"
+        echo "    key: ${name}_acceptance"
+        echo "    env:"
+        echo "      PYTHONPATH: \"python/:.\""
+        echo "    artifact_paths:"
+        echo "      - \"artifacts.out/**/*\""
+        echo "    retry:"
+        echo "      automatic:"
+        echo "        - exit_status: -1 # Agent was lost"
+        echo "        - exit_status: 255 # Forced agent shutdown"
+    done
+}
 
-# if the pipeline is triggered from a PR, run a reduced pipeline
-if [ -z "$RUN_ALL_TESTS" ]; then
-    [ "$BUILDKITE_PULL_REQUEST" = "false" ] && export RUN_ALL_TESTS=y
-fi
+# gen_bazel_acceptance generates steps for bazel tests in acceptance folder.
+gen_bazel_acceptance() {
+    for test in $(bazel query 'kind(test, //acceptance/...)' 2>/dev/null); do
+        # test has the format //acceptance/<name>:<name>_test
+        name=$(echo $test | cut -d ':' -f 1)
+        name=${name#'//acceptance/'}
+        echo "  - label: \":bazel: Acceptance: $name\""
+        echo "    command:"
+        if [[ "$test" =~ "go" ]]; then
+            # for go tests add verbose flag.
+            echo "      - bazel test $test --test_arg=-test.v"
+        else
+            echo "      - bazel test $test"
+        fi
+        echo "    key: ${name}_acceptance"
+        echo "    artifact_paths:"
+        echo "      - \"artifacts.out/**/*\""
+        echo "    retry:"
+        echo "      automatic:"
+        echo "        - exit_status: -1 # Agent was lost"
+        echo "        - exit_status: 255 # Forced agent shutdown"
+    done
+}
 
-# begin the pipeline.yml file
-"$BASE/common.sh"
-echo "steps:"
-
-# build scion image and binaries
-cat "$STEPS/setup.yml"
-
-# Print instructions for manual build
-echo "- label: 'Print instructions to trigger acceptance tests as user'"
-echo "  command: 'envsubst < $BASE/files/acceptance_trigger_instructions'"
-echo "  env:"
-# The DOLLAR variable is used to create a $ in the output of envsubst. https://stackoverflow.com/questions/24963705/is-there-an-escape-character-for-envsubst
-echo "    DOLLAR: '$'"
-# build images together with unit tests
-if [ "$RUN_ALL_TESTS" = "y" ]; then
-    cat "$STEPS/build_all.yml"
-fi
-
-# Linting and Unit tests
-cat "$STEPS/test.yml"
-
-# we need to wait for the build_all step
-if [ "$RUN_ALL_TESTS" = "y" ]; then
-echo "- wait"
-fi
-
-# integration testing
-"$STEPS/integration"
-
-# conditionally run more tests
-if [ "$RUN_ALL_TESTS" = "y" ]; then
-    # docker integration testing
-    cat "$STEPS/docker-integration.yml"
-    # acceptance testing
-    cat "$TRIGGERS/acceptance-trigger.yml"
-fi
-
-# deploy
-cat "$STEPS/deploy.yml"
+cat .buildkite/pipeline.yml
+gen_bazel_acceptance
+gen_acceptance

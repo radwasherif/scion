@@ -37,15 +37,12 @@ GEN_PATH = 'gen'
 TOPO_FILE = "topology.json"
 #: Networks config
 NETWORKS_FILE = "networks.conf"
-PRV_NETWORKS_FILE = "private_networks.conf"
 #: IFIDs list
 IFIDS_FILE = "ifids.yml"
 #: AS list
 AS_LIST_FILE = "as_list.yml"
 #: Prometheus config
 PROM_FILE = "prometheus.yml"
-#: Overlay
-OVERLAY_FILE = "overlay"
 
 #: Buffer size for receiving packets
 SCION_BUFLEN = 65535
@@ -57,10 +54,6 @@ SCION_ROUTER_PORT = 50000
 DISPATCHER_DIR = "/run/shm/dispatcher"
 #: Default SCION dispatcher ID
 DEFAULT_DISPATCHER_ID = "default"
-#: Default SCION daemon UNIX socket directory
-SCIOND_API_SOCKDIR = "/run/shm/sciond/"
-#: Default SCION daemon API UNIX socket
-SCIOND_API_DEFAULT_SOCK = "default.sock"
 
 #: Dispatcher registration timeout
 DISPATCHER_TIMEOUT = 60.0

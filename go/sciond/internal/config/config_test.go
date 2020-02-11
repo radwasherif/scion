@@ -22,7 +22,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/scionproto/scion/go/lib/env/envtest"
-	"github.com/scionproto/scion/go/lib/infra/modules/idiscovery/idiscoverytest"
 	"github.com/scionproto/scion/go/lib/pathstorage/pathstoragetest"
 	"github.com/scionproto/scion/go/lib/sciond"
 	"github.com/scionproto/scion/go/lib/truststorage/truststoragetest"
@@ -43,12 +42,10 @@ func TestConfigSample(t *testing.T) {
 func InitTestConfig(cfg *Config) {
 	envtest.InitTest(&cfg.General, &cfg.Logging, &cfg.Metrics, &cfg.Tracing, nil)
 	truststoragetest.InitTestConfig(&cfg.TrustDB)
-	idiscoverytest.InitTestConfig(&cfg.Discovery)
 	InitTestSDConfig(&cfg.SD)
 }
 
 func InitTestSDConfig(cfg *SDConfig) {
-	cfg.DeleteSocket = true
 	pathstoragetest.InitTestPathDBConf(&cfg.PathDB)
 	pathstoragetest.InitTestRevCacheConf(&cfg.RevCache)
 }
@@ -56,17 +53,12 @@ func InitTestSDConfig(cfg *SDConfig) {
 func CheckTestConfig(t *testing.T, cfg *Config, id string) {
 	envtest.CheckTest(t, &cfg.General, &cfg.Logging, &cfg.Metrics, &cfg.Tracing, nil, id)
 	truststoragetest.CheckTestConfig(t, &cfg.TrustDB, id)
-	idiscoverytest.CheckTestConfig(t, &cfg.Discovery)
 	CheckTestSDConfig(t, &cfg.SD, id)
 }
 
 func CheckTestSDConfig(t *testing.T, cfg *SDConfig, id string) {
 	pathstoragetest.CheckTestPathDBConf(t, &cfg.PathDB, id)
 	pathstoragetest.CheckTestRevCacheConf(t, &cfg.RevCache)
-	assert.Equal(t, sciond.DefaultSCIONDPath, cfg.Reliable)
-	assert.Equal(t, "/run/shm/sciond/default-unix.sock", cfg.Unix)
-	assert.Equal(t, sciond.DefaultSocketFileMode, int(cfg.SocketFileMode))
-	assert.Equal(t, "127.0.0.1:0", cfg.Public)
+	assert.Equal(t, sciond.DefaultSCIONDAddress, cfg.Address)
 	assert.Equal(t, DefaultQueryInterval, cfg.QueryInterval.Duration)
-	assert.False(t, cfg.DeleteSocket)
 }

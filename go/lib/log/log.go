@@ -53,8 +53,13 @@ var (
 // buffered, and flushed every logFlush seconds.  If logFlush < 0: logging
 // output is buffered, but must be manually flushed by calling Flush(). If
 // logFlush = 0 logging output is unbuffered and Flush() is a no-op.
+// Set compress to true to enable rotated file compression.
 func SetupLogFile(name string, logDir string, logLevel string, logSize int, logAge int,
-	logBackups int, logFlush int) error {
+	logBackups int, logFlush int, compress bool) error {
+
+	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+		return common.NewBasicError("Unable create log directory:", err)
+	}
 
 	logLvl, err := log15.LvlFromString(changeTraceToDebug(logLevel))
 	if err != nil {
@@ -71,6 +76,7 @@ func SetupLogFile(name string, logDir string, logLevel string, logSize int, logA
 		MaxSize:    logSize, // MiB
 		MaxAge:     logAge,  // days
 		MaxBackups: logBackups,
+		Compress:   compress,
 	}
 
 	if logFlush != 0 {
@@ -139,6 +145,7 @@ func setHandlers() {
 	log15.Root().SetHandler(handler)
 }
 
+// LogPanicAndExit catches panics and logs them.
 func LogPanicAndExit() {
 	if msg := recover(); msg != nil {
 		log15.Crit("Panic", "msg", msg, "stack", string(debug.Stack()))
@@ -148,6 +155,7 @@ func LogPanicAndExit() {
 	}
 }
 
+// Flush writes the logs to the underlying buffer.
 func Flush() {
 	if logBuf != nil {
 		logBuf.Flush()

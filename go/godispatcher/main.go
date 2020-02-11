@@ -16,6 +16,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"net/http"
@@ -96,6 +97,8 @@ func realMain() int {
 	}
 
 	env.SetupEnv(nil)
+	http.HandleFunc("/config", configHandler)
+	http.HandleFunc("/info", env.InfoHandler)
 	cfg.Metrics.StartPrometheus()
 
 	returnCode := waitForTeardown()
@@ -138,7 +141,6 @@ func RunDispatcher(deleteSocketFlag bool, applicationSocket string, socketFileMo
 		}
 	}
 	dispatcher := &network.Dispatcher{
-		RoutingTable:      network.NewIATable(1024, 65535),
 		OverlaySocket:     fmt.Sprintf(":%d", overlayPort),
 		ApplicationSocket: applicationSocket,
 		SocketFileMode:    socketFileMode,
@@ -176,4 +178,11 @@ func checkPerms() error {
 		return serrors.New("Running as root is not allowed for security reasons")
 	}
 	return nil
+}
+
+func configHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	var buf bytes.Buffer
+	toml.NewEncoder(&buf).Encode(cfg)
+	fmt.Fprint(w, buf.String())
 }

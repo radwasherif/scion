@@ -16,9 +16,11 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/user"
@@ -104,6 +106,8 @@ func realMain() int {
 	}()
 	egress.Init(tunIO)
 	ingress.Init(tunIO)
+	http.HandleFunc("/config", configHandler)
+	http.HandleFunc("/info", env.InfoHandler)
 	cfg.Metrics.StartPrometheus()
 	select {
 	case <-fatal.ShutdownChan():
@@ -117,11 +121,11 @@ func realMain() int {
 func setupBasic() error {
 	// Load and initialize config.
 	if _, err := toml.DecodeFile(env.ConfigFile(), &cfg); err != nil {
-		return err
+		return serrors.New("Failed to load config", "err", err, "file", env.ConfigFile())
 	}
 	cfg.InitDefaults()
 	if err := env.InitLogging(&cfg.Logging); err != nil {
-		return err
+		return serrors.New("Failed to initialize logging", "err", err)
 	}
 	prom.ExportElementID(cfg.Sig.ID)
 	return env.LogAppStarted("SIG", cfg.Sig.ID)
@@ -202,4 +206,11 @@ func loadConfig(path string) bool {
 	}
 	atomic.StoreUint64(&metrics.ConfigVersion, cfg.ConfigVersion)
 	return true
+}
+
+func configHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	var buf bytes.Buffer
+	toml.NewEncoder(&buf).Encode(cfg)
+	fmt.Fprint(w, buf.String())
 }

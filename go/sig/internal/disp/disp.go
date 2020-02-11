@@ -53,7 +53,7 @@ func (rt RegType) String() string {
 type RegPld struct {
 	Id   mgmt.MsgIdType
 	P    interface{}
-	Addr *snet.Addr
+	Addr *snet.UDPAddr
 }
 
 type RegPldChan chan *RegPld
@@ -100,7 +100,7 @@ func (dm *dispRegistry) Unregister(regType RegType, key RegPollKey) error {
 	return nil
 }
 
-func (dm *dispRegistry) sigCtrl(pld *mgmt.Pld, addr *snet.Addr) {
+func (dm *dispRegistry) sigCtrl(pld *mgmt.Pld, addr *snet.UDPAddr) {
 	dm.Lock()
 	defer dm.Unlock()
 	u, err := pld.Union()
@@ -131,7 +131,19 @@ func (dm *dispRegistry) sigCtrl(pld *mgmt.Pld, addr *snet.Addr) {
 
 func dispFunc(dp *pktdisp.DispPkt) {
 	scpld, err := ctrl.NewSignedPldFromRaw(dp.Raw)
-	src := dp.Addr.Copy()
+	var src *snet.UDPAddr
+	switch v := dp.Addr.(type) {
+	case *snet.UDPAddr:
+		src = &snet.UDPAddr{
+			IA:      v.IA,
+			Path:    v.Path.Copy(),
+			NextHop: snet.CopyUDPAddr(v.NextHop),
+			Host:    snet.CopyUDPAddr(v.Host),
+		}
+	default:
+		log.Error("Not valid snet address")
+		return
+	}
 	if err != nil {
 		log.Error("Unable to parse signed ctrl payload", "src", src, "err", err)
 		return
