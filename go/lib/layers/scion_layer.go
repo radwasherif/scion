@@ -19,9 +19,10 @@ type SCIONLayer struct {
 	AddrHdr common.RawBytes
 	RawPath common.RawBytes
 	HBH     []*Extension
-	E2E     []*Extension
-	//radwa: we keep a separate pointer to the security extension, always parse it as first E2E extension
+	//we keep a separate field for the security extension, always parse it as first E2E extension
 	SecExt     *SPSE
+	E2E     []*Extension
+
 	L4         common.RawBytes
 	RawPayload common.RawBytes
 
@@ -154,6 +155,7 @@ func (s *SCIONLayer) serializeCommonHdr() error {
 }
 
 func (s *SCIONLayer) serializeExtensions(extensions []common.Extension, secExt *spse.Extn) error {
+	snet.StableSortExtensions(extensions)
 	hbh, e2e, err := hpkt.ValidateExtensions(extensions)
 	if err != nil {
 		return err
