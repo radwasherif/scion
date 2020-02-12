@@ -102,7 +102,7 @@ func (c *CmnHdr) Write(b []byte) {
 	//Save bytes needed for authenticated
 	c.AuthenticatedBytes = make([]byte, 3)
 	common.Order.PutUint16(c.AuthenticatedBytes[:2], verDstSrc)
-
+	c.AuthenticatedBytes[2] = uint8(c.NextHdr)
 }
 
 func (c *CmnHdr) UpdatePathOffsets(b []byte, iOff, hOff uint8) {

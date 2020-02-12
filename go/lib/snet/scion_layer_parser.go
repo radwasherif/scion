@@ -1,6 +1,8 @@
-package layers
+package snet
 
-import "github.com/scionproto/scion/go/lib/spkt"
+import (
+	"github.com/scionproto/scion/go/lib/spkt"
+)
 
 func (s *SCIONLayer) Decode() {
 
@@ -15,6 +17,6 @@ func (s *SCIONLayer) decodeCmdHdr() error {
 }
 
 func (s *SCIONLayer) decodeAddrHdr() {
-	bytes := s.Bytes[spkt.CmnHdrLen:]
+	//bytes := s.Bytes[spkt.CmnHdrLen:]
 
 }

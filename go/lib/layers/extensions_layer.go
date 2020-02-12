@@ -107,6 +107,26 @@ func (e *Extension) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.Serial
 
 	return nil
 }
+func (e *Extension) serialize(b gopacket.SerializeBuffer, opts gopacket.SerializeOptions) (common.RawBytes, error) {
+	totalLength := common.ExtnSubHdrLen + len(e.Data)
+	paddingSize := 0
+	if opts.FixLengths {
+		paddingSize = util.CalcPadding(totalLength, common.LineLen)
+		totalLength += paddingSize
+		e.NumLines = uint8(totalLength / common.LineLen)
+	}
+	bytes, err := b.PrependBytes(totalLength)
+	if err != nil {
+		return nil, err
+	}
+	bytes[0] = uint8(e.NextHeader)
+	bytes[1] = e.NumLines
+	bytes[2] = e.Type
+	copy(bytes[3:], e.Data)
+	copy(bytes[3+len(e.Data):], zeroes[:paddingSize])
+
+	return bytes, nil
+}
 
 type SPSE struct {
 	*Extension
@@ -133,27 +153,29 @@ func (e *SPSE) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.SerializeOp
 	//Keep pointer to the buffer containing authenticator
 	//Initialized to zero, set later by call to SetAuthenticator after MAC computation
 	e.AuthenticatorBuffer = bytes[3+e.AuthStartOffset : 3+e.AuthEndOffset]
-
 	return nil
 }
 
-func (e *Extension) serialize(b gopacket.SerializeBuffer, opts gopacket.SerializeOptions) (common.RawBytes, error) {
+func (e *SPSE) Serialize() common.RawBytes {
 	totalLength := common.ExtnSubHdrLen + len(e.Data)
-	paddingSize := 0
-	if opts.FixLengths {
-		paddingSize = util.CalcPadding(totalLength, common.LineLen)
-		totalLength += paddingSize
-		e.NumLines = uint8(totalLength / common.LineLen)
-	}
-	bytes, err := b.PrependBytes(totalLength)
-	if err != nil {
-		return nil, err
-	}
+	paddingSize := util.CalcPadding(totalLength, common.LineLen)
+	totalLength += paddingSize
+	e.NumLines = uint8(totalLength / common.LineLen)
+	bytes := make(common.RawBytes, totalLength)
 	bytes[0] = uint8(e.NextHeader)
 	bytes[1] = e.NumLines
 	bytes[2] = e.Type
 	copy(bytes[3:], e.Data)
 	copy(bytes[3+len(e.Data):], zeroes[:paddingSize])
+	//The bytes that need to be authenticated
+	e.AuthenticatedBytes = bytes
 
-	return bytes, nil
+	//Keep pointer to the buffer containing authenticator
+	//Initialized to zero, set later by call to SetAuthenticator after MAC computation
+	e.AuthenticatorBuffer = bytes[3+e.AuthStartOffset : 3+e.AuthEndOffset]
+
+	return bytes
+
 }
+
+
