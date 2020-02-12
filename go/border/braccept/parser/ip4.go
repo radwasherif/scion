@@ -93,7 +93,7 @@ func (ip *IP4TaggedLayer) updateFields(kvs propMap) {
 		case "Checksum":
 			ip.Checksum = uint16(HexToInt(v))
 			ip.opts.ComputeChecksums = false
-		case "nextHdr":
+		case "NextHdr":
 			var ip4Meta []layers.EnumMetadata
 			ip4Meta = layers.IPProtocolMetadata[:]
 			ip.Protocol = layers.IPProtocol(ParseProto(ip4Meta, v))

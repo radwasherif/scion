@@ -114,7 +114,7 @@ func (hbh *HBHTaggedLayer) Update(lines []string) {
 func (hbh *HBHTaggedLayer) updateFields(kvs propMap) {
 	for k, v := range kvs {
 		switch k {
-		case "nextHdr":
+		case "NextHdr":
 			hbh.NextHeader = parseScionProto(v)
 		case "Length":
 			hbh.NumLines = uint8(StrToInt(v))

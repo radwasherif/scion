@@ -18,9 +18,9 @@ func core_to_core() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:12 EthernetType=IPv4
-		IP4: Src=192.168.12.3 Dst=192.168.12.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.12.3 Dst=192.168.12.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:2 Src=172.16.2.1 DstIA=1-ff00:0:3 Dst=172.16.3.1
 			IF_1: ISD=1 Hops=3
 				HF_1: ConsIngress=211 ConsEgress=0
@@ -51,9 +51,9 @@ func xover_core_to_child() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:13 EthernetType=IPv4
-		IP4: Src=192.168.13.3 Dst=192.168.13.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.13.3 Dst=192.168.13.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:3 Src=172.16.3.1 DstIA=1-ff00:0:5 Dst=172.16.5.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=311 ConsEgress=0
@@ -87,9 +87,9 @@ func xover_child_to_core() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:15 EthernetType=IPv4
-		IP4: Src=192.168.15.3 Dst=192.168.15.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.15.3 Dst=192.168.15.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:5 Src=172.16.5.1 DstIA=1-ff00:0:3 Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=511 ConsEgress=0
@@ -123,9 +123,9 @@ func xover_child_to_child() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:15 EthernetType=IPv4
-		IP4: Src=192.168.15.3 Dst=192.168.15.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.15.3 Dst=192.168.15.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:5 Src=172.16.5.1 DstIA=1-ff00:0:4 Dst=172.16.4.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=511 ConsEgress=0
@@ -159,9 +159,9 @@ func child_to_parent() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:14 EthernetType=IPv4
-		IP4: Src=192.168.14.3 Dst=192.168.14.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.14.3 Dst=192.168.14.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:4 Src=174.16.4.1 DstIA=1-ff00:0:3 Dst=172.16.3.1
 			IF_1: ISD=1 Hops=3
 				HF_1: ConsIngress=411 ConsEgress=0
@@ -192,9 +192,9 @@ func parent_to_child() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:13 EthernetType=IPv4
-		IP4: Src=192.168.13.3 Dst=192.168.13.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.13.3 Dst=192.168.13.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:3 Src=174.16.3.1 DstIA=1-ff00:0:4 Dst=174.16.4.1
 			IF_1: ISD=1 Hops=3 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
@@ -224,9 +224,9 @@ func shortcut_child_to_peer() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:14 EthernetType=IPv4
-		IP4: Src=192.168.14.3 Dst=192.168.14.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.14.3 Dst=192.168.14.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:4 Src=172.16.4.1 DstIA=1-ff00:0:2 Dst=172.16.2.1
 			IF_1: ISD=1 Hops=4 Flags=Shortcut,Peer
 				HF_1: ConsIngress=411 ConsEgress=0
@@ -263,9 +263,9 @@ func shortcut_peer_to_child() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:12 EthernetType=IPv4
-		IP4: Src=192.168.12.3 Dst=192.168.12.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.12.3 Dst=192.168.12.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=8 CurrHopF=10 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=8 CurrHopF=10 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:4 Src=172.16.4.1 DstIA=1-ff00:0:2 Dst=172.16.2.1
 			IF_1: ISD=1 Hops=3 Flags=Shortcut,Peer
 				HF_1: ConsIngress=231 ConsEgress=0   Flags=Xover
@@ -302,9 +302,9 @@ func shortcut_child_to_child() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:14 EthernetType=IPv4
-		IP4: Src=192.168.14.3 Dst=192.168.14.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.14.3 Dst=192.168.14.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:4 Src=172.16.4.1 DstIA=1-ff00:0:5 Dst=172.16.5.1
 			IF_1: ISD=1 Hops=3 Flags=Shortcut
 				HF_1: ConsIngress=411 ConsEgress=0

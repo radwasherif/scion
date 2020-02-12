@@ -155,7 +155,6 @@ func writeExtensions(extensions []common.Extension, buffer gopacket.SerializeBuf
 			return serrors.New("cannot push unknown layer")
 		}
 	}
-
 	return nil
 }
 

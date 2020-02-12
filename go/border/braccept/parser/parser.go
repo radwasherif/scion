@@ -23,7 +23,7 @@
 // 2. It uniquely names a layer.
 //
 // As an example:
-//    IP4: Src=192.168.12.3 Dst=192.168.12.2 nextHdr=UDP
+//    IP4: Src=192.168.12.3 Dst=192.168.12.2 NextHdr=UDP
 //    UDP_1: Src=40000 Dst=50000 Checksum=0
 //
 // The above example defines a packet with two layers, IP4 and UDP,
@@ -34,9 +34,9 @@
 // as the first layer.
 //
 // It is also possible to define a layer which consists of multiple lines:
-//    IP4: Src=192.168.12.3 Dst=192.168.12.2 nextHdr=UDP
+//    IP4: Src=192.168.12.3 Dst=192.168.12.2 NextHdr=UDP
 //    UDP: Src=40000 Dst=50000 Checksum=0
-//    SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=SVC
+//    SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=SVC
 //        ADDR: SrcIA=1-ff00:0:2 Src=172.16.2.1 DstIA=1-ff00:0:1 Dst=192.168.0.51
 //        IF_1: ISD=1 Hops=3 Flags=Peer
 //            HF_1: ConsIngress=261 ConsEgress=0   Flags=Xover
@@ -46,7 +46,7 @@
 //
 // From the parsing point of view, everyline with deeper indentation than the layer itself belong
 // to the layer, so in the example above, the SCION layer would consist of:
-//    SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=SVC
+//    SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=SVC
 //        ADDR: SrcIA=1-ff00:0:2 Src=172.16.2.1 DstIA=1-ff00:0:1 Dst=192.168.0.51
 //        IF_1: ISD=1 Hops=3 Flags=Peer
 //            HF_1: ConsIngress=261 ConsEgress=0   Flags=Xover

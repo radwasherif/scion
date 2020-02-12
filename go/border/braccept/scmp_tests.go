@@ -32,9 +32,9 @@ func (c scmpTestCfg) scmpBadVersion() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: Ver=8 nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: Ver=8 NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -55,9 +55,9 @@ func (c scmpTestCfg) scmpBadDstType() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=5
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=5
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -78,9 +78,9 @@ func (c scmpTestCfg) scmpBadSrcType() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=5 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=5 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -99,9 +99,9 @@ func (c scmpTestCfg) scmpBadPktLenShort() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4 TotalLen=63 HdrLen=7
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4 TotalLen=63 HdrLen=7
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -116,14 +116,14 @@ func (c scmpTestCfg) scmpBadPktLenShort() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=%d ConsEgress=0
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=CMNHDR Type=BAD_PKT_LEN Checksum=0
 			InfoPktSize: Size=64 MTU=1472
@@ -143,9 +143,9 @@ func (c scmpTestCfg) scmpBadPktLenLong() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4 TotalLen=65 HdrLen=7
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4 TotalLen=65 HdrLen=7
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -160,14 +160,14 @@ func (c scmpTestCfg) scmpBadPktLenLong() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=%d ConsEgress=0
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=CMNHDR Type=BAD_PKT_LEN Checksum=0
 			InfoPktSize: Size=64 MTU=1472
@@ -189,9 +189,9 @@ func (c scmpTestCfg) scmpBadHdrLenShort() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4 TotalLen=64 HdrLen=6
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4 TotalLen=64 HdrLen=6
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -212,9 +212,9 @@ func (c scmpTestCfg) scmpBadHdrLenLong() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4 TotalLen=64 HdrLen=8
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4 TotalLen=64 HdrLen=8
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -233,9 +233,9 @@ func (c scmpTestCfg) scmpBadInfoFieldOffsetLow() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=3 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=3 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -250,11 +250,11 @@ func (c scmpTestCfg) scmpBadInfoFieldOffsetLow() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=CMNHDR Type=BAD_IOF_OFFSET Checksum=0
 			QUOTED: RawPkt=%s
@@ -272,9 +272,9 @@ func (c scmpTestCfg) scmpBadInfoFieldOffsetHigh() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=255 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=255 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -289,11 +289,11 @@ func (c scmpTestCfg) scmpBadInfoFieldOffsetHigh() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=CMNHDR Type=BAD_IOF_OFFSET Checksum=0
 			QUOTED: RawPkt=%s
@@ -311,9 +311,9 @@ func (c scmpTestCfg) scmpBadHopFieldOffsetLow() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=1 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=1 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -328,11 +328,11 @@ func (c scmpTestCfg) scmpBadHopFieldOffsetLow() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=CMNHDR Type=BAD_HOF_OFFSET Checksum=0
 			QUOTED: RawPkt=%s
@@ -350,9 +350,9 @@ func (c scmpTestCfg) scmpBadHopFieldOffsetHigh() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=255 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=255 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -367,11 +367,11 @@ func (c scmpTestCfg) scmpBadHopFieldOffsetHigh() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=CMNHDR Type=BAD_HOF_OFFSET Checksum=0
 			QUOTED: RawPkt=%s
@@ -389,9 +389,9 @@ func (c scmpTestCfg) scmpPathRequired() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 		UDP_1:
 	`, c.DstIA))
@@ -402,11 +402,11 @@ func (c scmpTestCfg) scmpPathRequired() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=0 CurrHopF=0 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=PATH Type=PATH_REQUIRED Checksum=0
 			QUOTED: RawPkt=%s
@@ -424,9 +424,9 @@ func (c scmpTestCfg) scmpBadMac() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0 Mac=007700
@@ -441,14 +441,14 @@ func (c scmpTestCfg) scmpBadMac() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311 Mac=c0beef
 				HF_2: ConsIngress=%d ConsEgress=0 Mac=007700
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=PATH Type=BAD_MAC Checksum=0
 			InfoPathOffsets: InfoF=4 HopF=5 IfID=%d Ingress=false
@@ -467,9 +467,9 @@ func (c scmpTestCfg) scmpExpiredHopField() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2 TsInt=0
 				HF_1: ConsIngress=%d ConsEgress=0
@@ -484,14 +484,14 @@ func (c scmpTestCfg) scmpExpiredHopField() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir TsInt=0
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=%d ConsEgress=0
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=PATH Type=EXPIRED_HOPF Checksum=0
 			InfoPathOffsets: InfoF=4 HopF=5 IfID=%d Ingress=false
@@ -511,9 +511,9 @@ func (c scmpTestCfg) scmpBadInterface() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=1-ff00:0:1 Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=666 ConsEgress=0
@@ -528,14 +528,14 @@ func (c scmpTestCfg) scmpBadInterface() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=666 ConsEgress=0
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=PATH Type=BAD_IF Checksum=0
 			InfoPathOffsets: InfoF=4 HopF=5 IfID=666 Ingress=false
@@ -555,9 +555,9 @@ func (c scmpTestCfg) scmpNonRoutingHopField() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0 Flags=VerifyOnly
@@ -572,14 +572,14 @@ func (c scmpTestCfg) scmpNonRoutingHopField() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=%d ConsEgress=0 Flags=VerifyOnly
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=PATH Type=NON_ROUTING_HOPF Checksum=0
 			InfoPathOffsets: InfoF=4 HopF=5 IfID=%d Ingress=false
@@ -600,20 +600,20 @@ func (c scmpTestCfg) scmpTooManyHopByHop() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
 				HF_2: ConsIngress=0   ConsEgress=311
-		HBH: nextHdr=HBH Type=OHP
+		HBH: NextHdr=HBH Type=OHP
 			HBH.Empty:
-		HBH: nextHdr=HBH Type=OHP
+		HBH: NextHdr=HBH Type=OHP
 			HBH.Empty:
-		HBH: nextHdr=HBH Type=OHP
+		HBH: NextHdr=HBH Type=OHP
 			HBH.Empty:
-		HBH: nextHdr=UDP Type=OHP
+		HBH: NextHdr=UDP Type=OHP
 			HBH.Empty:
 		UDP_1:
 	`, c.DstIA, c.LocalInterface))
@@ -625,20 +625,20 @@ func (c scmpTestCfg) scmpTooManyHopByHop() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=%d ConsEgress=0
-		HBH: nextHdr=HBH Type=SCMP
+		HBH: NextHdr=HBH Type=SCMP
 			HBH.SCMP: Flags=Error
-		HBH: nextHdr=HBH Type=OHP
+		HBH: NextHdr=HBH Type=OHP
 			HBH.Empty:
-		HBH: nextHdr=HBH Type=OHP
+		HBH: NextHdr=HBH Type=OHP
 			HBH.Empty:
-		HBH: nextHdr=SCMP Type=OHP
+		HBH: NextHdr=SCMP Type=OHP
 			HBH.OHP:
 		SCMP: Class=EXT Type=TOO_MANY_HOPBYHOP Checksum=0
 			InfoExtIdx: Idx=4
@@ -658,16 +658,16 @@ func (c scmpTestCfg) scmpBadExtensionOrder() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
 				HF_2: ConsIngress=0   ConsEgress=311
-		HBH: nextHdr=HBH Type=OHP
+		HBH: NextHdr=HBH Type=OHP
 			HBH.OHP:
-		HBH: nextHdr=UDP Type=SCMP
+		HBH: NextHdr=UDP Type=SCMP
 			HBH.SCMP:
 		UDP_1:
 	`, c.DstIA, c.LocalInterface))
@@ -679,16 +679,16 @@ func (c scmpTestCfg) scmpBadExtensionOrder() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=%d ConsEgress=0
-		HBH: nextHdr=HBH Type=SCMP
+		HBH: NextHdr=HBH Type=SCMP
 			HBH.SCMP: Flags=Error
-		HBH: nextHdr=SCMP Type=OHP
+		HBH: NextHdr=SCMP Type=OHP
 			HBH.OHP:
 		SCMP: Class=EXT Type=BAD_EXT_ORDER Checksum=0
 			InfoExtIdx: Idx=1
@@ -708,14 +708,14 @@ func (c scmpTestCfg) scmpBadHopByHop() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.61 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.61 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=20006 Dst=30001
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.61 DstIA=%s Dst=172.16.3.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=%d ConsEgress=0
 				HF_2: ConsIngress=0   ConsEgress=311
-		HBH: nextHdr=UDP Type=InvHBH
+		HBH: NextHdr=UDP Type=InvHBH
 			HBH.Empty:
 		UDP_1:
 	`, c.DstIA, c.LocalInterface))
@@ -727,14 +727,14 @@ func (c scmpTestCfg) scmpBadHopByHop() int {
 	pkt1 := AllocatePacket()
 	pkt1.ParsePacket(fmt.Sprintf(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:00:01 DstMAC=f0:0d:ca:fe:be:ef EthernetType=IPv4
-		IP4: Src=192.168.0.11 Dst=192.168.0.61 nextHdr=UDP Flags=DF Checksum=0
+		IP4: Src=192.168.0.11 Dst=192.168.0.61 NextHdr=UDP Flags=DF Checksum=0
 		UDP: Src=30001 Dst=20006 Checksum=0
-		SCION: nextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=HBH CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.11 DstIA=1-ff00:0:1 Dst=192.168.0.61
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=311
 				HF_2: ConsIngress=%d ConsEgress=0
-		HBH: nextHdr=SCMP Type=SCMP
+		HBH: NextHdr=SCMP Type=SCMP
 			HBH.SCMP: Flags=Error,HBH
 		SCMP: Class=EXT Type=BAD_HOPBYHOP Checksum=0
 			InfoExtIdx: Idx=0

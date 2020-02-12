@@ -48,7 +48,7 @@ func (r *Reply) DecodeFrom(rd io.Reader) error {
 	return r.fromProtoFormat(&protoObject)
 }
 
-// Serialize encodes a reply message into its capnp representation. No
+// SerializeTo encodes a reply message into its capnp representation. No
 // validation of transport keys is performed.
 func (r *Reply) SerializeTo(wr io.Writer) error {
 	return r.toProtoFormat().SerializeTo(wr)

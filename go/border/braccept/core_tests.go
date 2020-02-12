@@ -18,9 +18,9 @@ func core_to_internal_host() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:12 EthernetType=IPv4
-		IP4: Src=192.168.12.3 Dst=192.168.12.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.12.3 Dst=192.168.12.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:2 Src=172.16.2.1 DstIA=1-ff00:0:1 Dst=192.168.0.51
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=211
@@ -50,9 +50,9 @@ func internal_host_to_core() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.51 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.51 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=30041 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=5 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:1 Src=192.168.0.51 DstIA=1-ff00:0:2 Dst=172.16.2.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=121 ConsEgress=0
@@ -82,9 +82,9 @@ func xover_core_to_internal_child() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:12 EthernetType=IPv4
-		IP4: Src=192.168.12.3 Dst=192.168.12.2 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.12.3 Dst=192.168.12.2 NextHdr=UDP Flags=DF
 		UDP: Src=40000 Dst=50000
-		SCION: nextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=4 CurrHopF=6 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:2 Src=172.16.2.1 DstIA=1-ff00:0:8 Dst=172.16.8.1
 			IF_1: ISD=1 Hops=2 Flags=ConsDir
 				HF_1: ConsIngress=0   ConsEgress=211
@@ -118,9 +118,9 @@ func xover_internal_child_to_core() int {
 	pkt0 := AllocatePacket()
 	pkt0.ParsePacket(`
 		Ethernet: SrcMAC=f0:0d:ca:fe:be:ef DstMAC=f0:0d:ca:fe:00:01 EthernetType=IPv4
-		IP4: Src=192.168.0.13 Dst=192.168.0.11 nextHdr=UDP Flags=DF
+		IP4: Src=192.168.0.13 Dst=192.168.0.11 NextHdr=UDP Flags=DF
 		UDP: Src=30003 Dst=30001
-		SCION: nextHdr=UDP CurrInfoF=7 CurrHopF=8 SrcType=IPv4 DstType=IPv4
+		SCION: NextHdr=UDP CurrInfoF=7 CurrHopF=8 SrcType=IPv4 DstType=IPv4
 			ADDR: SrcIA=1-ff00:0:8 Src=172.16.8.1 DstIA=1-ff00:0:2 Dst=172.16.2.1
 			IF_1: ISD=1 Hops=2
 				HF_1: ConsIngress=811 ConsEgress=0
