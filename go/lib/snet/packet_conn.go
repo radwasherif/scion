@@ -15,7 +15,6 @@
 package snet
 
 import (
-	"github.com/scionproto/scion/go/lib/layers"
 	"github.com/scionproto/scion/go/lib/spse"
 	"net"
 	"sort"
@@ -170,7 +169,7 @@ func (c *SCIONPacketConn) WriteTo(pkt *SCIONPacket, ov *net.UDPAddr) error {
 	//	Pld:     pkt.Payload,
 	//}
 	pkt.Prepare()
-	scionLayer := layers.NewSCIONLayer(pkt)
+	scionLayer := NewSCIONLayer(pkt)
 	n, err := scionLayer.Serialize()
 	if err != nil {
 		return common.NewBasicError("Unable to serialize SCION packet", err)

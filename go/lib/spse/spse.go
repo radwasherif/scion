@@ -217,7 +217,8 @@ func (s *Extn) Sum(b common.RawBytes) error {
 	if err != nil {
 		return err
 	}
-	err = s.SetAuthenticator(h.Sum(b))
+	//h.Sum return a concatenation of b and the tag
+	err = s.SetAuthenticator(h.Sum(b)[len(b):])
 	if err != nil {
 		return err
 	}
