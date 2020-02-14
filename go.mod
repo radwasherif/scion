@@ -2,7 +2,6 @@ module github.com/scionproto/scion
 
 require (
 	github.com/BurntSushi/toml v0.3.1
-	github.com/aead/cmac v0.0.0-20160719120800-7af84192f0b1
 	github.com/antlr/antlr4 v0.0.0-20181218183524-be58ebffde8e
 	github.com/buildkite/go-buildkite v2.2.1-0.20190413010238-568b6651b687+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect

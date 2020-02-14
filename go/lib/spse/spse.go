@@ -27,9 +27,10 @@ package spse
 
 import (
 	"bytes"
+	"crypto/aes"
 	"fmt"
+	"github.com/dchest/cmac"
 
-	"github.com/aead/cmac/aes"
 	"github.com/scionproto/scion/go/lib/common"
 )
 
@@ -213,12 +214,17 @@ func (s *Extn) String() string {
 }
 
 func (s *Extn) Sum(b common.RawBytes) error {
-	h, err := aes.New(s.Key)
+	block, err := aes.NewCipher(s.Key)
 	if err != nil {
 		return err
 	}
+	mac, err := cmac.New(block)
+	if err != nil {
+		return err
+	}
+	sum := mac.Sum(b)
 	//h.Sum return a concatenation of b and the tag
-	err = s.SetAuthenticator(h.Sum(b)[len(b):])
+	err = s.SetAuthenticator(sum[len(b):])
 	if err != nil {
 		return err
 	}
@@ -226,12 +232,15 @@ func (s *Extn) Sum(b common.RawBytes) error {
 }
 
 func (s *Extn) Verify(b common.RawBytes) (bool, error) {
-	h, err := aes.New(s.Key)
+	block, err := aes.NewCipher(s.Key)
 	if err != nil {
 		return false, err
 	}
+	mac, err := cmac.New(block)
+	if err != nil {
+		return false, err
+	}
+	sum := mac.Sum(b)
 
-	mac := h.Sum(b)
-
-	return bytes.Equal(s.Authenticator, mac), nil
+	return bytes.Equal(s.Authenticator, sum), nil
 }
