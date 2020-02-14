@@ -150,7 +150,7 @@ func (c *SCIONPacketConn) Close() error {
 }
 
 func (c *SCIONPacketConn) WriteTo(pkt *SCIONPacket, ov *net.UDPAddr) error {
-	StableSortExtensions(pkt.Extensions)
+	//StableSortExtensions(pkt.Extensions)
 	//hbh, e2e, err := hpkt.ValidateExtensions(pkt.Extensions)
 	//if err != nil {
 	//	return common.NewBasicError("Bad extension list", err)
