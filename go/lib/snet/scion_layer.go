@@ -34,12 +34,14 @@ type SCIONLayer struct {
 
 	nextHdr       []common.L4ProtocolType
 	SecExtnBuffer common.RawBytes
+
+	Buffer common.RawBytes
 }
 
 func NewSCIONLayer(s *SCIONPacket) *SCIONLayer {
 	//starting with fields that have no "dependencies" and building around them
 	sl := &SCIONLayer{SCIONPacket: s}
-	sl.Bytes = Bytes{}
+	sl.Buffer = common.RawBytes{}
 	return sl
 }
 func (s *SCIONLayer) Serialize() (int, error) {
@@ -53,7 +55,7 @@ func (s *SCIONLayer) Serialize() (int, error) {
 		return 0, common.NewBasicError("Error writing payload to buffer", err)
 	}
 
-	//writes L4 header and payload to s.Bytes
+	//writes L4 header and payload to s.Buffer
 	//still could be replaced by lightweight byte slices
 	err = s.serializeL4(s.L4Header) //L4 depends on: payload, address
 	if err != nil {
@@ -90,18 +92,19 @@ func (s *SCIONLayer) Serialize() (int, error) {
 	}
 
 	s.serialize()
-	return len(s.Bytes), nil
+	copy(s.Bytes, s.Buffer)
+	return len(s.Buffer), nil
 }
 
 func (s *SCIONLayer) serialize() {
-	s.Bytes = append(s.Bytes, s.CmnHdrRaw...)
-	s.Bytes = append(s.Bytes, s.AddrHdr...)
-	s.Bytes = append(s.Bytes, s.RawPath...)
-	s.Bytes = append(s.Bytes, s.HBHRaw...)
-	s.Bytes = append(s.Bytes, s.SecExtnBuffer...)
-	s.Bytes = append(s.Bytes, s.E2ERaw...)
-	s.Bytes = append(s.Bytes, s.L4...)
-	s.Bytes = append(s.Bytes, s.RawPayload...)
+	s.Buffer = append(s.Buffer, s.CmnHdrRaw...)
+	s.Buffer = append(s.Buffer, s.AddrHdr...)
+	s.Buffer = append(s.Buffer, s.RawPath...)
+	s.Buffer = append(s.Buffer, s.HBHRaw...)
+	s.Buffer = append(s.Buffer, s.SecExtnBuffer...)
+	s.Buffer = append(s.Buffer, s.E2ERaw...)
+	s.Buffer = append(s.Buffer, s.L4...)
+	s.Buffer = append(s.Buffer, s.RawPayload...)
 }
 
 func (s *SCIONLayer) serializeForAuth(b gopacket.SerializeBuffer) error {

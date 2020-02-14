@@ -146,6 +146,7 @@ func TestSCIONLayer_Serialize(t *testing.T) {
 	pkt := &SCIONPacket{
 		SCIONPacketInfo: pktInf,
 	}
+	pkt.Prepare()
 	s := NewSCIONLayer(pkt)
 	n, err := s.Serialize()
 	if err != nil {
@@ -175,10 +176,10 @@ func TestSCIONLayer_Serialize(t *testing.T) {
 		0, 23, 0, 24, 0, 15, 41, 111,
 		10, 20, 30, 40, 50, 60, 70,
 	}
-	if len(bytes) != len(s.Bytes) {
+	if len(bytes) != n {
 		t.Fatalf("Length should be %d, but is %d", len(bytes), len(s.Bytes))
 	}
-	for i := range s.Bytes {
+	for i := range s.Bytes[:n] {
 		if bytes[i] != s.Bytes[i] {
 			t.Fatalf("Bytes #%d should be %b but is %b", i, bytes[i], s.Bytes[i])
 
