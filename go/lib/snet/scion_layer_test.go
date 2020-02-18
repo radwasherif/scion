@@ -1,6 +1,7 @@
 package snet
 
 import (
+	"bytes"
 	"github.com/google/gopacket"
 	"github.com/scionproto/scion/go/lib/addr"
 	"github.com/scionproto/scion/go/lib/common"
@@ -8,11 +9,12 @@ import (
 	"github.com/scionproto/scion/go/lib/layers"
 	"github.com/scionproto/scion/go/lib/spath"
 	"github.com/scionproto/scion/go/lib/spse"
+	"github.com/scionproto/scion/go/lib/xtest"
 	"testing"
 )
 
 func TestSCIONLayer_serializeForAuth(t *testing.T) {
-	bytes := []byte{
+	b := []byte{
 		0, 65, 0,
 		16, 0, 255, 170, 0, 0, 17, 1,
 		0, 1, 255, 170, 0, 0, 17, 3,
@@ -31,14 +33,8 @@ func TestSCIONLayer_serializeForAuth(t *testing.T) {
 	}
 	authExt, _ := spse.NewExtn(spse.AesCMac)
 	authExt.Key = make(common.RawBytes, 32)
-	dstIA, err := addr.IAFromString("4096-ffaa:0:1101")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	srcIA, err := addr.IAFromString("1-ffaa:0:1103")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	dstIA := xtest.MustParseIA("4096-ffaa:0:1101")
+	srcIA := xtest.MustParseIA("1-ffaa:0:1103")
 	pktInf := SCIONPacketInfo{
 		Destination: SCIONAddress{
 			IA:   dstIA,
@@ -80,35 +76,24 @@ func TestSCIONLayer_serializeForAuth(t *testing.T) {
 	s.Serialize()
 	bf := gopacket.NewSerializeBuffer()
 
-	err = s.serializeForAuth(bf)
+	err := s.serializeForAuth(bf)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	t.Log(bf.Bytes())
-	t.Log(bytes)
-	if len(bf.Bytes()) != len(bytes) {
+
+	if len(bf.Bytes()) != len(b) {
 		t.Fatal("Lengths of two buffers should be equal")
 	}
 	bfBytes := bf.Bytes()
-	for i := 0; i < len(bytes); i++ {
-		if bytes[i] != bfBytes[i] {
-			t.Fatalf("Bytes #%d should be %b but is %b", i, bytes[i], bfBytes[i])
-		}
-	}
 
+	bytes.Compare(b, bfBytes)
 }
 
 func TestSCIONLayer_Serialize(t *testing.T) {
 	authExt, _ := spse.NewExtn(spse.AesCMac)
 	authExt.Key = make(common.RawBytes, 32)
-	dstIA, err := addr.IAFromString("4096-ffaa:0:1101")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	srcIA, err := addr.IAFromString("1-ffaa:0:1103")
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	dstIA := xtest.MustParseIA("4096-ffaa:0:1101")
+	srcIA := xtest.MustParseIA("1-ffaa:0:1103")
 	pktInf := SCIONPacketInfo{
 		Destination: SCIONAddress{
 			IA:   dstIA,
@@ -159,7 +144,7 @@ func TestSCIONLayer_Serialize(t *testing.T) {
 			t.Log(s.Bytes[i:])
 		}
 	}
-	bytes := []byte{
+	b := []byte{
 		0, 65, 0, 119, 7, 0, 0, 0,
 		16, 0, 255, 170, 0, 0, 17, 1,
 		0, 1, 255, 170, 0, 0, 17, 3,
@@ -176,12 +161,12 @@ func TestSCIONLayer_Serialize(t *testing.T) {
 		0, 23, 0, 24, 0, 15, 41, 111,
 		10, 20, 30, 40, 50, 60, 70,
 	}
-	if len(bytes) != n {
-		t.Fatalf("Length should be %d, but is %d", len(bytes), len(s.Bytes))
+	if len(b) != n {
+		t.Fatalf("Length should be %d, but is %d", len(b), len(s.Bytes))
 	}
 	for i := range s.Bytes[:n] {
-		if bytes[i] != s.Bytes[i] {
-			t.Fatalf("Bytes #%d should be %b but is %b", i, bytes[i], s.Bytes[i])
+		if b[i] != s.Bytes[i] {
+			t.Fatalf("Bytes #%d should be %b but is %b", i, b[i], s.Bytes[i])
 
 		}
 	}

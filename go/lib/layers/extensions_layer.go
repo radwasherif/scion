@@ -46,15 +46,13 @@ var (
 	zeroes = make([]byte, common.MaxMTU)
 )
 
-
 type Extension struct {
 	layers.BaseLayer
 	NextHeader         common.L4ProtocolType
 	NumLines           uint8
-	Type               uint8
-	Class              common.L4ProtocolType
+	Type               common.ExtnType
 	Data               []byte
-	AuthenticatedBytes common.RawBytes
+	AuthenticatedBytes []byte
 }
 
 func (e *Extension) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) error {
@@ -78,7 +76,7 @@ func (e *Extension) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) err
 
 	e.NextHeader = common.L4ProtocolType(data[0])
 	e.NumLines = data[1]
-	e.Type = data[2]
+	e.Type.Type = data[2]
 	e.Data = data[3:expectedLength]
 	e.BaseLayer.Contents = data[:expectedLength]
 	e.BaseLayer.Payload = data[expectedLength:]
@@ -92,7 +90,7 @@ func (e *Extension) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.Serial
 	}
 
 	//The bytes that need to be authenticated
-	switch e.Class {
+	switch e.Type.Class {
 	case common.HopByHopClass:
 		e.AuthenticatedBytes = []byte{bytes[0], bytes[2]} //HBH: only next header and type
 	case common.End2EndClass: //E2E: entire extension
@@ -101,7 +99,7 @@ func (e *Extension) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.Serial
 
 	return nil
 }
-func (e *Extension) serialize(b gopacket.SerializeBuffer, opts gopacket.SerializeOptions) (common.RawBytes, error) {
+func (e *Extension) serialize(b gopacket.SerializeBuffer, opts gopacket.SerializeOptions) ([]byte, error) {
 	totalLength := common.ExtnSubHdrLen + len(e.Data)
 	paddingSize := 0
 	if opts.FixLengths {
@@ -115,7 +113,7 @@ func (e *Extension) serialize(b gopacket.SerializeBuffer, opts gopacket.Serializ
 	}
 	bytes[0] = uint8(e.NextHeader)
 	bytes[1] = e.NumLines
-	bytes[2] = e.Type
+	bytes[2] = e.Type.Type
 	copy(bytes[3:], e.Data)
 	copy(bytes[3+len(e.Data):], zeroes[:paddingSize])
 
@@ -123,16 +121,16 @@ func (e *Extension) serialize(b gopacket.SerializeBuffer, opts gopacket.Serializ
 }
 
 type SPSE struct {
-	*Extension
+	Extension
 	//AuthenticatorBuffer is a pointer to the serialization buffer where the MAC is written
-	AuthenticatorBuffer common.RawBytes
+	AuthenticatorBuffer []byte
 	//AuthStartOffset the start offset of the authenticator relative to the Data field
 	AuthStartOffset int
 	//AuthEndOffset the end offset of the authenticator relative to the Data field
 	AuthEndOffset int
 }
 
-func (e *SPSE) SetAuthenticator(b common.RawBytes) {
+func (e *SPSE) SetAuthenticator(b []byte) {
 	copy(e.AuthenticatorBuffer, b)
 }
 
@@ -150,15 +148,15 @@ func (e *SPSE) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.SerializeOp
 	return nil
 }
 
-func (e *SPSE) Serialize() common.RawBytes {
+func (e *SPSE) Serialize() []byte {
 	totalLength := common.ExtnSubHdrLen + len(e.Data)
 	paddingSize := util.CalcPadding(totalLength, common.LineLen)
 	totalLength += paddingSize
 	e.NumLines = uint8(totalLength / common.LineLen)
-	bytes := make(common.RawBytes, totalLength)
+	bytes := make([]byte, totalLength)
 	bytes[0] = uint8(e.NextHeader)
 	bytes[1] = e.NumLines
-	bytes[2] = e.Type
+	bytes[2] = e.Type.Type
 	copy(bytes[3:], e.Data)
 	copy(bytes[3+len(e.Data):], zeroes[:paddingSize])
 	//The bytes that need to be authenticated
@@ -166,10 +164,8 @@ func (e *SPSE) Serialize() common.RawBytes {
 
 	//Keep pointer to the buffer containing authenticator
 	//Initialized to zero, set later by call to SetAuthenticator after MAC computation
-	e.AuthenticatorBuffer = bytes[3+e.AuthStartOffset : 3+e.AuthEndOffset]
+	e.AuthenticatorBuffer = bytes[common.ExtnSubHdrLen+e.AuthStartOffset : common.ExtnSubHdrLen+e.AuthEndOffset]
 
 	return bytes
 
 }
-
-

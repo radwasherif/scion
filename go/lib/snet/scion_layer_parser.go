@@ -17,6 +17,19 @@ func (s *SCIONLayer) decodeCmdHdr() error {
 }
 
 func (s *SCIONLayer) decodeAddrHdr() {
-	//bytes := s.Bytes[spkt.CmnHdrLen:]
-
+	//bytes := common.RawBytes(s.Bytes[spkt.CmnHdrLen:])
+	//s.Destination = SCIONAddress{}
+	//s.Source = SCIONAddress{}
+	//s.Destination.IA.Parse(bytes[:addr.IABytes])
+	//s.Source.IA.Parse(bytes[addr.IABytes : 2*addr.IABytes])
+	//
+	//dstLen, err := addr.HostLen(s.CmnHdr.DstType)
+	//if err != nil {
+	//	return err
+	//}
+	//srcLen, err := addr.HostLen(s.CmnHdr.SrcType)
+	//
+	//switch s.CmnHdr.DstType:
+	//	addr.HostIPv4{}
+	//s.Destination.Host = addr.HostIPv4(bytes[2*addr.IABytes:2*addr.IABytes+dstLen])
 }

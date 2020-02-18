@@ -106,7 +106,7 @@ type SCIONPacketInfo struct {
 	// example, for a SCMP::General::RecordPathRequest packet).
 	Extensions []common.Extension
 
-	//Security extensions, for now only two per packet
+	//Security extensions, for now only one per packet
 	AuthExt *spse.Extn
 
 	// L4Header contains L4 header information.
@@ -150,7 +150,6 @@ func (c *SCIONPacketConn) Close() error {
 }
 
 func (c *SCIONPacketConn) WriteTo(pkt *SCIONPacket, ov *net.UDPAddr) error {
-	//StableSortExtensions(pkt.Extensions)
 	//hbh, e2e, err := hpkt.ValidateExtensions(pkt.Extensions)
 	//if err != nil {
 	//	return common.NewBasicError("Bad extension list", err)
