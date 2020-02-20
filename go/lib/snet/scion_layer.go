@@ -7,66 +7,63 @@ import (
 	"github.com/scionproto/scion/go/lib/hpkt"
 	"github.com/scionproto/scion/go/lib/l4"
 	"github.com/scionproto/scion/go/lib/layers"
-	"github.com/scionproto/scion/go/lib/spath"
 	"github.com/scionproto/scion/go/lib/spkt"
 	"github.com/scionproto/scion/go/lib/util"
 )
 
-type SCIONLayer struct {
+type scionLayer struct {
 	SCIONPacket
 	CmnHdr    spkt.CmnHdr
-	CmnHdrRaw []byte
-
-	AddrHdr []byte
-	RawPath []byte
 
 	HBH    []*layers.Extension
-	HBHRaw []byte
+
 	//we keep a separate field for the security extension, always parse it as first E2E extension
 	SecExt    *layers.SPSE
-	SecExtRaw []byte
-
-	E2E    []*layers.Extension
-	E2ERaw []byte
-
-	L4         []byte
-	RawPayload []byte
-
-	nextHdr       []common.L4ProtocolType
 	SecExtnBuffer []byte
 
-	Buffer []byte
+	E2E    []*layers.Extension
+
+	nextHdr       []common.L4ProtocolType
+
 }
 
-func NewSCIONLayer(s *SCIONPacket) *SCIONLayer {
-	//starting with fields that have no "dependencies" and building around them
-	sl := &SCIONLayer{SCIONPacket: *s}
-	return sl
-}
-func (s *SCIONLayer) Serialize() (int, error) {
+func (s *scionLayer) serialize() (int, error) {
 	//ORDER OF CALLS IS IMPORTANT
 	//start with address and path, have no dependencies, save in struct fields, do not write to s.Buffer yet
-	s.serializeAddrHdr(s.Source, s.Destination)
-	s.serializePath(s.Path)
-	s.RawPayload = make([]byte, s.Payload.Len())
-	_, err := s.Payload.WritePld(s.RawPayload)
+	hdrLen := spkt.CmnHdrLen
+	addrRaw := s.serializeAddrHdr(hdrLen)
+	hdrLen += len(addrRaw)
+	pathRaw := s.serializePath(hdrLen)
+	hdrLen += len(pathRaw)
+
+	totalLen := hdrLen
+
+	payloadRaw := make([]byte, s.Payload.Len())
+	_, err := s.Payload.WritePld(payloadRaw)
 	if err != nil {
 		return 0, common.NewBasicError("Error writing payload to buffer", err)
 	}
 
 	//writes L4 header and payload to s.Buffer
-	//still could be replaced by lightweight byte slices
-	err = s.serializeL4(s.L4Header) //L4 depends on: payload, address
+	l4Raw, err := s.serializeL4(addrRaw, payloadRaw) //L4 depends on: payload, address
 	if err != nil {
 		return 0, common.NewBasicError("Error serializing L4", err)
 	}
 	//serialize Extensions
-	err = s.serializeExtensions() //extensions depend on: L4 (last nxtHdr)
+	hbhRaw, e2eRaw, secExtnOffset, err := s.serializeExtensions(hdrLen) //extensions depend on: L4 (last nxtHdr)
 	if err != nil {
 		return 0, common.NewBasicError("Error serializing extensions", err)
 	}
 
-	err = s.serializeCommonHdr() //common header depends on: L4/extensions (nxtHdr), length of buffer for totalLen calculation
+
+	totalLen += len(hbhRaw) + len(s.SecExtnBuffer) + len(e2eRaw)
+
+	copy(s.Bytes[totalLen:], l4Raw)
+	totalLen += len(l4Raw)
+	copy(s.Bytes[totalLen:], payloadRaw)
+	totalLen += len(payloadRaw)
+
+	err = s.serializeCommonHdr(hdrLen, totalLen) //common header depends on: L4/extensions (nxtHdr), length of buffer for totalLen calculation
 	if err != nil {
 		return 0, common.NewBasicError("Error serializing common header", err)
 	}
@@ -78,10 +75,17 @@ func (s *SCIONLayer) Serialize() (int, error) {
 		//assumption is that s.CmnHdr, s.HBH, s.E2E and s.SecExt all implicitly store special fields
 		//which hold only the bytes needed for authentication,
 		//this call merely "collects" these bytes slices and arranges them together
-		err := s.serializeForAuth(bAuth)
+		err := s.serializeForAuth(hdrLen, bAuth)
 		if err != nil {
 			return 0, err
 		}
+		l4PayloadBytes := l4Raw
+		l4PayloadBytes = append(l4PayloadBytes, payloadRaw...)
+		bytes, err := bAuth.AppendBytes(len(l4PayloadBytes))
+		if err != nil {
+			return 0, err
+		}
+		copy(bytes, l4PayloadBytes)
 
 		err = s.AuthExt.Sum(bAuth.Bytes())
 		if err != nil {
@@ -89,59 +93,33 @@ func (s *SCIONLayer) Serialize() (int, error) {
 		}
 		//SecExt has a pointer to the buffer where the MAC should be stored,
 		//this is maintained by the order of the calls in this function
+		//s.SecExt.SetAuthenticator(s.AuthExt.Authenticator)
 		s.SecExt.SetAuthenticator(s.AuthExt.Authenticator)
+		copy(s.Bytes[secExtnOffset:], s.SecExtnBuffer)
 	}
 
-	s.serialize()
-	copy(s.Bytes, s.Buffer)
-	return len(s.Buffer), nil
+	return totalLen, nil
 }
 
-func (s *SCIONLayer) serialize() {
-	s.Buffer = make([]byte, len(s.CmnHdrRaw)+len(s.AddrHdr)+len(s.RawPath)+len(s.HBHRaw)+
-		len(s.SecExtnBuffer)+len(s.E2ERaw)+len(s.L4)+len(s.RawPayload))
-	copy(s.Buffer[:len(s.CmnHdrRaw)], s.CmnHdrRaw)
-	offset := len(s.CmnHdrRaw)
-	copy(s.Buffer[offset:], s.AddrHdr)
-	offset += len(s.AddrHdr)
-	copy(s.Buffer[offset:], s.RawPath)
-	offset += len(s.RawPath)
-	copy(s.Buffer[offset:], s.HBHRaw)
-	offset += len(s.HBHRaw)
-	copy(s.Buffer[offset:], s.SecExtnBuffer)
-	offset += len(s.SecExtnBuffer)
-	copy(s.Buffer[offset:], s.E2ERaw)
-	offset += len(s.E2ERaw)
-	copy(s.Buffer[offset:], s.L4)
-	offset += len(s.L4)
-	copy(s.Buffer[offset:], s.RawPayload)
-}
 
-func (s *SCIONLayer) serializeForAuth(b gopacket.SerializeBuffer) error {
+func (s *scionLayer) serializeForAuth(hdrLen int, b gopacket.SerializeBuffer) error {
 	err := s.serializeExtnForAuth(b)
 	if err != nil {
 		return err
 	}
 	headerBytes := s.CmnHdr.AuthenticatedBytes
-	headerBytes = append(headerBytes, s.AddrHdr...)
-	headerBytes = append(headerBytes, s.RawPath...)
+	headerBytes = append(headerBytes, s.Bytes[spkt.CmnHdrLen:hdrLen]...)
 	bytes, err := b.PrependBytes(len(headerBytes))
 	if err != nil {
 		return err
 	}
 	copy(bytes, headerBytes)
 
-	l4PayloadBytes := s.L4
-	l4PayloadBytes = append(l4PayloadBytes, s.RawPayload...)
-	bytes, err = b.AppendBytes(len(l4PayloadBytes))
-	if err != nil {
-		return err
-	}
-	copy(bytes, l4PayloadBytes)
+
 	return nil
 }
 
-func (s *SCIONLayer) serializeExtnForAuth(b gopacket.SerializeBuffer) error {
+func (s *scionLayer) serializeExtnForAuth(b gopacket.SerializeBuffer) error {
 	for i := 0; i < len(s.E2E); i++ {
 		bytes, err := b.PrependBytes(len(s.E2E[i].AuthenticatedBytes))
 		if err != nil {
@@ -166,55 +144,55 @@ func (s *SCIONLayer) serializeExtnForAuth(b gopacket.SerializeBuffer) error {
 
 }
 
-func (s *SCIONLayer) serializeCommonHdr() error {
-	hdrLen := spkt.CmnHdrLen + len(s.AddrHdr) + len(s.RawPath)
-	packtLen := len(s.HBHRaw) + len(s.E2ERaw) + len(s.SecExtnBuffer) + len(s.L4) + len(s.RawPayload)
+func (s *scionLayer) serializeCommonHdr(hdrLen, totalLen int) error {
 	//still using this struct, because it's convenient and does the job
 	s.CmnHdr = spkt.CmnHdr{
 		Ver:       spkt.SCIONVersion,
 		DstType:   s.Destination.Host.Type(),
 		SrcType:   s.Source.Host.Type(),
-		TotalLen:  uint16(hdrLen + packtLen),      //buffer should contain:l4 header, payload, extensions
+		TotalLen:  uint16(totalLen),      //buffer should contain:l4 header, payload, extensions
 		HdrLen:    uint8(hdrLen / common.LineLen), //in multiple of 8
 		CurrInfoF: 0,
 		CurrHopF:  0,
 		NextHdr:   s.nextHdr[len(s.nextHdr)-1],
 	}
 
-	s.CmnHdrRaw = make([]byte, spkt.CmnHdrLen)
-	s.CmnHdr.Write(s.CmnHdrRaw)
+	s.CmnHdr.Write(s.Bytes[:spkt.CmnHdrLen])
 	return nil
 }
 
-func (s *SCIONLayer) serializeExtensions() error {
+func (s *scionLayer) serializeExtensions(offset int) ([]byte, []byte, int, error) {
 	StableSortExtensions(s.Extensions)
 	hbh, e2e, err := hpkt.ValidateExtensions(s.Extensions)
 	if err != nil {
-		return err
+		return nil, nil, 0, err
 	}
 
-	s.E2ERaw, err = s.serializeExtensionsHelper(e2e)
+	e2eRaw, err := s.serializeExtensionsHelper(e2e)
 	if err != nil {
-		return nil
+		return nil, nil, 0, err
 	}
 	if s.AuthExt != nil {
 		s.SecExt, err = layers.ExtensionDataToSPSELayer(s.nextHdr[len(s.nextHdr)-1], *s.AuthExt)
 		if err != nil {
-			return err
+			return nil, nil, 0, err
 		}
 		s.SecExtnBuffer = s.SecExt.Serialize()
 		//s.SecExt.SetAuthenticator([]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255})
 		s.nextHdr = append(s.nextHdr, s.AuthExt.Class())
 	}
-	s.HBHRaw, err = s.serializeExtensionsHelper(hbh)
+	hbhRaw, err := s.serializeExtensionsHelper(hbh)
 	if err != nil {
-		return err
+		return nil, nil, 0, err
 	}
-	return nil
+	copy(s.Bytes[offset:], hbhRaw)
+	secExtnOffset := offset + len(hbhRaw)
+	copy(s.Bytes[secExtnOffset+len(s.SecExtnBuffer):], e2eRaw)
+	return hbhRaw, e2eRaw, secExtnOffset, nil
 
 }
 
-func (s *SCIONLayer) serializeExtensionsHelper(extensions []common.Extension) ([]byte, error) {
+func (s *scionLayer) serializeExtensionsHelper(extensions []common.Extension) ([]byte, error) {
 	raw := []byte{}
 	for i := len(extensions) - 1; i >= 0; i-- {
 		extnLayer, err := layers.ExtensionDataToExtensionLayer(s.nextHdr[len(s.nextHdr)-1], extensions[i])
@@ -241,29 +219,33 @@ func (s *SCIONLayer) serializeExtensionsHelper(extensions []common.Extension) ([
 	return raw, nil
 }
 
-func (s *SCIONLayer) serializeL4(l4Hdr l4.L4Header) error {
-	l4Hdr.SetPldLen(len(s.RawPayload))
-	err := l4.SetCSum(l4Hdr, s.AddrHdr, s.RawPayload)
+func (s *scionLayer) serializeL4(addrRaw, payloadRaw []byte) ([]byte, error) {
+	s.L4Header.SetPldLen(len(payloadRaw))
+	err := l4.SetCSum(s.L4Header, addrRaw, payloadRaw)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.L4 = make([]byte, l4Hdr.L4Len())
-	err = l4Hdr.Write(s.L4)
+	l4Raw := make([]byte, s.L4Header.L4Len())
+	err = s.L4Header.Write(l4Raw)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.nextHdr = append(s.nextHdr, l4Hdr.L4Type())
+	s.nextHdr = append(s.nextHdr, s.L4Header.L4Type())
 
-	return nil
+	return l4Raw, nil
 }
 
-func (s *SCIONLayer) serializePath(path *spath.Path) {
-	if !path.IsEmpty() {
-		s.RawPath = path.Raw
+func (s *scionLayer) serializePath(offset int) []byte {
+	if !s.Path.IsEmpty() {
+		copy(s.Bytes[offset:], s.Path.Raw)
+		return s.Path.Raw
 	}
+	return []byte{}
 }
-func (s *SCIONLayer) serializeAddrHdr(src, dst SCIONAddress) {
 
+func (s *scionLayer) serializeAddrHdr(offset int) []byte {
+	src := s.Source
+	dst := s.Destination
 	// write dst first, then src
 	IABuffer := make([]byte, addr.IABytes*2)
 	src.IA.Write(IABuffer[addr.IABytes:])
@@ -279,5 +261,6 @@ func (s *SCIONLayer) serializeAddrHdr(src, dst SCIONAddress) {
 	padding := make([]byte, paddingLen)
 	addressBuffer = append(addressBuffer, padding...)
 
-	s.AddrHdr = addressBuffer
+	copy(s.Bytes[offset:], addressBuffer)
+	return addressBuffer
 }

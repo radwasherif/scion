@@ -114,6 +114,18 @@ type SCIONPacketInfo struct {
 	Payload  common.Payload
 }
 
+func (pkt *SCIONPacket) Serialize() error {
+	pkt.Prepare()
+	scionLayer := scionLayer{SCIONPacket:*pkt}
+	n, err := scionLayer.serialize()
+	if err != nil {
+		return common.NewBasicError("Unable to serialize SCION packet", err)
+	}
+	pkt.Bytes = pkt.Bytes[:n]
+
+	return nil
+}
+
 // SCIONAddress is the fully-specified address of a host.
 type SCIONAddress struct {
 	IA   addr.IA
@@ -167,15 +179,12 @@ func (c *SCIONPacketConn) WriteTo(pkt *SCIONPacket, ov *net.UDPAddr) error {
 	//	L4:      pkt.L4Header,
 	//	Pld:     pkt.Payload,
 	//}
-	pkt.Prepare()
-	scionLayer := NewSCIONLayer(pkt)
-	n, err := scionLayer.Serialize()
+	err := pkt.Serialize()
 	if err != nil {
-		return common.NewBasicError("Unable to serialize SCION packet", err)
+		return common.NewBasicError("Error serializing SCIONPacket", err)
 	}
-	pkt.Bytes = pkt.Bytes[:n]
 	// Send message
-	n, err = c.conn.WriteTo(pkt.Bytes, ov)
+	n, err := c.conn.WriteTo(pkt.Bytes, ov)
 	if err != nil {
 		return common.NewBasicError("Reliable socket write error", err)
 	}

@@ -4,11 +4,11 @@ import (
 	"github.com/scionproto/scion/go/lib/spkt"
 )
 
-func (s *SCIONLayer) Decode() {
+func (s *scionLayer) Decode() {
 
 }
 
-func (s *SCIONLayer) decodeCmdHdr() error {
+func (s *scionLayer) decodeCmdHdr() error {
 	err := s.CmnHdr.Parse(s.Bytes[:spkt.CmnHdrLen])
 	if err != nil {
 		return err
@@ -16,7 +16,7 @@ func (s *SCIONLayer) decodeCmdHdr() error {
 	return nil
 }
 
-func (s *SCIONLayer) decodeAddrHdr() {
+func (s *scionLayer) decodeAddrHdr() {
 	//bytes := common.RawBytes(s.Bytes[spkt.CmnHdrLen:])
 	//s.Destination = SCIONAddress{}
 	//s.Source = SCIONAddress{}
