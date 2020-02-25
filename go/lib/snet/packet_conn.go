@@ -15,6 +15,7 @@
 package snet
 
 import (
+	"github.com/scionproto/scion/go/lib/spse"
 	"net"
 	"sort"
 	"time"
@@ -104,9 +105,25 @@ type SCIONPacketInfo struct {
 	// even when the L4Header and Payload demand one (as is the case, for
 	// example, for a SCMP::General::RecordPathRequest packet).
 	Extensions []common.Extension
+
+	//Security extensions, for now only one per packet
+	AuthExt *spse.Extn
+
 	// L4Header contains L4 header information.
 	L4Header l4.L4Header
 	Payload  common.Payload
+}
+
+func (pkt *SCIONPacket) Serialize() error {
+	pkt.Prepare()
+	scionLayer := scionLayer{SCIONPacket:*pkt}
+	n, err := scionLayer.serialize()
+	if err != nil {
+		return common.NewBasicError("Unable to serialize SCION packet", err)
+	}
+	pkt.Bytes = pkt.Bytes[:n]
+
+	return nil
 }
 
 // SCIONAddress is the fully-specified address of a host.
@@ -145,32 +162,29 @@ func (c *SCIONPacketConn) Close() error {
 }
 
 func (c *SCIONPacketConn) WriteTo(pkt *SCIONPacket, ov *net.UDPAddr) error {
-	StableSortExtensions(pkt.Extensions)
-	hbh, e2e, err := hpkt.ValidateExtensions(pkt.Extensions)
+	//hbh, e2e, err := hpkt.ValidateExtensions(pkt.Extensions)
+	//if err != nil {
+	//	return common.NewBasicError("Bad extension list", err)
+	//}
+	//// TODO(scrye): scnPkt is a temporary solution. Its functionality will be
+	//// absorbed by the easier to use SCIONPacket structure in this package.
+	//scnPkt := &spkt.ScnPkt{
+	//	DstIA:   pkt.Destination.IA,
+	//	SrcIA:   pkt.Source.IA,
+	//	DstHost: pkt.Destination.Host,
+	//	SrcHost: pkt.Source.Host,
+	//	E2EExt:  e2e,
+	//	HBHExt:  hbh,
+	//	Path:    pkt.Path,
+	//	L4:      pkt.L4Header,
+	//	Pld:     pkt.Payload,
+	//}
+	err := pkt.Serialize()
 	if err != nil {
-		return common.NewBasicError("Bad extension list", err)
+		return common.NewBasicError("Error serializing SCIONPacket", err)
 	}
-	// TODO(scrye): scnPkt is a temporary solution. Its functionality will be
-	// absorbed by the easier to use SCIONPacket structure in this package.
-	scnPkt := &spkt.ScnPkt{
-		DstIA:   pkt.Destination.IA,
-		SrcIA:   pkt.Source.IA,
-		DstHost: pkt.Destination.Host,
-		SrcHost: pkt.Source.Host,
-		E2EExt:  e2e,
-		HBHExt:  hbh,
-		Path:    pkt.Path,
-		L4:      pkt.L4Header,
-		Pld:     pkt.Payload,
-	}
-	pkt.Prepare()
-	n, err := hpkt.WriteScnPkt(scnPkt, common.RawBytes(pkt.Bytes))
-	if err != nil {
-		return common.NewBasicError("Unable to serialize SCION packet", err)
-	}
-	pkt.Bytes = pkt.Bytes[:n]
 	// Send message
-	n, err = c.conn.WriteTo(pkt.Bytes, ov)
+	n, err := c.conn.WriteTo(pkt.Bytes, ov)
 	if err != nil {
 		return common.NewBasicError("Reliable socket write error", err)
 	}

@@ -27,7 +27,9 @@ package spse
 
 import (
 	"bytes"
+	"crypto/aes"
 	"fmt"
+	"github.com/dchest/cmac"
 
 	"github.com/scionproto/scion/go/lib/common"
 )
@@ -47,6 +49,8 @@ type Extn struct {
 	Metadata common.RawBytes
 	// Authenticator contains the authenticator required by the security mode.
 	Authenticator common.RawBytes
+	// Key contains the key used for authentication
+	Key common.RawBytes
 }
 
 const (
@@ -207,4 +211,36 @@ func (s *Extn) String() string {
 	fmt.Fprintf(buf, " Metadata: %s", s.Metadata)
 	fmt.Fprintf(buf, " Authenticator: %s", s.Authenticator)
 	return buf.String()
+}
+
+func (s *Extn) Sum(b common.RawBytes) error {
+	block, err := aes.NewCipher(s.Key)
+	if err != nil {
+		return err
+	}
+	mac, err := cmac.New(block)
+	if err != nil {
+		return err
+	}
+	sum := mac.Sum(b)
+	//h.Sum return a concatenation of b and the tag
+	err = s.SetAuthenticator(sum[len(b):])
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Extn) Verify(b common.RawBytes) (bool, error) {
+	block, err := aes.NewCipher(s.Key)
+	if err != nil {
+		return false, err
+	}
+	mac, err := cmac.New(block)
+	if err != nil {
+		return false, err
+	}
+	sum := mac.Sum(b)
+
+	return bytes.Equal(s.Authenticator, sum), nil
 }
