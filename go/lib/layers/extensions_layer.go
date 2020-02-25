@@ -50,7 +50,8 @@ type Extension struct {
 	layers.BaseLayer
 	NextHeader         common.L4ProtocolType
 	NumLines           uint8
-	Type               common.ExtnType
+	Type               uint8
+	Class              common.L4ProtocolType
 	Data               []byte
 	AuthenticatedBytes []byte
 }
@@ -76,7 +77,7 @@ func (e *Extension) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) err
 
 	e.NextHeader = common.L4ProtocolType(data[0])
 	e.NumLines = data[1]
-	e.Type.Type = data[2]
+	e.Type = data[2]
 	e.Data = data[3:expectedLength]
 	e.BaseLayer.Contents = data[:expectedLength]
 	e.BaseLayer.Payload = data[expectedLength:]
@@ -90,7 +91,7 @@ func (e *Extension) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.Serial
 	}
 
 	//The bytes that need to be authenticated
-	switch e.Type.Class {
+	switch e.Class {
 	case common.HopByHopClass:
 		e.AuthenticatedBytes = []byte{bytes[0], bytes[2]} //HBH: only next header and type
 	case common.End2EndClass: //E2E: entire extension
@@ -113,9 +114,9 @@ func (e *Extension) serialize(b gopacket.SerializeBuffer, opts gopacket.Serializ
 	}
 	bytes[0] = uint8(e.NextHeader)
 	bytes[1] = e.NumLines
-	bytes[2] = e.Type.Type
-	copy(bytes[3:], e.Data)
-	copy(bytes[3+len(e.Data):], zeroes[:paddingSize])
+	bytes[2] = e.Type
+	copy(bytes[common.ExtnSubHdrLen:], e.Data)
+	copy(bytes[common.ExtnSubHdrLen+len(e.Data):], zeroes[:paddingSize])
 
 	return bytes, nil
 }
@@ -134,20 +135,6 @@ func (e *SPSE) SetAuthenticator(b []byte) {
 	copy(e.AuthenticatorBuffer, b)
 }
 
-func (e *SPSE) SerializeTo(b gopacket.SerializeBuffer, opts gopacket.SerializeOptions) error {
-	bytes, err := e.serialize(b, opts)
-	if err != nil {
-		return err
-	}
-	//The bytes that need to be authenticated
-	e.AuthenticatedBytes = bytes
-
-	//Keep pointer to the buffer containing authenticator
-	//Initialized to zero, set later by call to SetAuthenticator after MAC computation
-	e.AuthenticatorBuffer = bytes[3+e.AuthStartOffset : 3+e.AuthEndOffset]
-	return nil
-}
-
 func (e *SPSE) Serialize() []byte {
 	totalLength := common.ExtnSubHdrLen + len(e.Data)
 	paddingSize := util.CalcPadding(totalLength, common.LineLen)
@@ -156,9 +143,9 @@ func (e *SPSE) Serialize() []byte {
 	bytes := make([]byte, totalLength)
 	bytes[0] = uint8(e.NextHeader)
 	bytes[1] = e.NumLines
-	bytes[2] = e.Type.Type
-	copy(bytes[3:], e.Data)
-	copy(bytes[3+len(e.Data):], zeroes[:paddingSize])
+	bytes[2] = e.Type
+	copy(bytes[common.ExtnSubHdrLen:], e.Data)
+	copy(bytes[common.ExtnSubHdrLen+len(e.Data):], zeroes[:paddingSize])
 	//The bytes that need to be authenticated
 	e.AuthenticatedBytes = bytes
 

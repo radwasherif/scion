@@ -24,7 +24,7 @@ import (
 func ExtensionFactory(class common.L4ProtocolType, extension *Extension) (common.Extension, error) {
 	switch class {
 	case common.HopByHopClass:
-		switch extension.Type.Type {
+		switch extension.Type {
 		case common.ExtnSCMPType.Type:
 			return NewExtnSCMPFromLayer(extension)
 		case common.ExtnOneHopPathType.Type:
@@ -33,7 +33,7 @@ func ExtensionFactory(class common.L4ProtocolType, extension *Extension) (common
 			return NewExtnUnknownFromLayer(common.HopByHopClass, extension)
 		}
 	case common.End2EndClass:
-		switch extension.Type.Type {
+		switch extension.Type {
 		case common.ExtnE2EDebugType.Type:
 			return NewExtnE2EDebugFromLayer(extension)
 		default:
@@ -228,7 +228,7 @@ func (u *ExtnUnknown) DecodeFromLayer(extension *Extension) error {
 			"length", len(extension.Data))
 	}
 	u.Length = int(extension.NumLines)*common.LineLen - common.ExtnSubHdrLen
-	u.TypeField = extension.Type.Type
+	u.TypeField = extension.Type
 	return nil
 }
 
@@ -283,22 +283,21 @@ func ExtensionDataToExtensionLayer(nextHdr common.L4ProtocolType,
 	}
 	return &Extension{
 		NextHeader: nextHdr,
-		Type:       data.Type(),
+		Type:       data.Type().Type,
+		Class:      data.Type().Class,
 		Data:       bytes,
 	}, nil
 }
 
 func ExtensionDataToSPSELayer(nextHdr common.L4ProtocolType,
 	extn spse.Extn) (*SPSE, error) {
-	authStartOffset := spse.SecModeLength + len(extn.Metadata)
-	authEndOffset := authStartOffset + len(extn.Authenticator)
 	extnLayer, err := ExtensionDataToExtensionLayer(nextHdr, &extn)
 	if err != nil {
 		return nil, err
 	}
 	return &SPSE{
 		Extension:       *extnLayer,
-		AuthStartOffset: authStartOffset,
-		AuthEndOffset:   authEndOffset,
+		AuthStartOffset: spse.SecModeLength + len(extn.Metadata),
+		AuthEndOffset:   spse.SecModeLength + len(extn.Metadata) + len(extn.Authenticator),
 	}, nil
 }
