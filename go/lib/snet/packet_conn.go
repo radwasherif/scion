@@ -126,6 +126,10 @@ func (pkt *SCIONPacket) Serialize() error {
 	return nil
 }
 
+func (pkt *SCIONPacket) Decode() error {
+	scionLayer := scionLayer{SCIONPacket: *pkt}
+}
+
 // SCIONAddress is the fully-specified address of a host.
 type SCIONAddress struct {
 	IA   addr.IA
@@ -254,13 +258,13 @@ func (c *SCIONPacketConn) readFrom(pkt *SCIONPacket, ov *net.UDPAddr) error {
 		return common.NewBasicError("SCION packet parse error", err)
 	}
 
-	pkt.Destination = SCIONAddress{IA: scnPkt.DstIA, Host: scnPkt.DstHost}
-	pkt.Source = SCIONAddress{IA: scnPkt.SrcIA, Host: scnPkt.SrcHost}
-	pkt.Path = scnPkt.Path
-	pkt.Extensions = append(pkt.Extensions, scnPkt.HBHExt...)
-	pkt.Extensions = append(pkt.Extensions, scnPkt.E2EExt...)
-	pkt.L4Header = scnPkt.L4
-	pkt.Payload = scnPkt.Pld
+	//pkt.Destination = SCIONAddress{IA: scnPkt.DstIA, Host: scnPkt.DstHost}
+	//pkt.Source = SCIONAddress{IA: scnPkt.SrcIA, Host: scnPkt.SrcHost}
+	//pkt.Path = scnPkt.Path
+	//pkt.Extensions = append(pkt.Extensions, scnPkt.HBHExt...)
+	//pkt.Extensions = append(pkt.Extensions, scnPkt.E2EExt...)
+	//pkt.L4Header = scnPkt.L4
+	//pkt.Payload = scnPkt.Pld
 	if ov != nil {
 		*ov = *lastHop
 	}

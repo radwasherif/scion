@@ -80,6 +80,10 @@ func (c *CmnHdr) Parse(b []byte) error {
 			"expected", SCIONVersion, "actual", c.Ver,
 		)
 	}
+	//Save bytes needed for authentication
+	c.AuthenticatedBytes = make([]byte, 3)
+	common.Order.PutUint16(c.AuthenticatedBytes[:2], verDstSrc)
+	c.AuthenticatedBytes[2] = uint8(c.NextHdr)
 	return nil
 }
 
@@ -99,11 +103,12 @@ func (c *CmnHdr) Write(b []byte) {
 	offset += 1
 	b[offset] = uint8(c.NextHdr)
 
-	//Save bytes needed for authenticated
+	//Save bytes needed for authentication
 	c.AuthenticatedBytes = make([]byte, 3)
 	common.Order.PutUint16(c.AuthenticatedBytes[:2], verDstSrc)
 	c.AuthenticatedBytes[2] = uint8(c.NextHdr)
 }
+
 
 func (c *CmnHdr) UpdatePathOffsets(b []byte, iOff, hOff uint8) {
 	c.CurrInfoF = iOff

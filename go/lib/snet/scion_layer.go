@@ -12,13 +12,13 @@ import (
 )
 
 type scionLayer struct {
-	SCIONPacket
-	CmnHdr    spkt.CmnHdr
+	*SCIONPacket
+	cmnHdr    spkt.CmnHdr
 
 	HBH    []*layers.Extension
 
 	//we keep a separate field for the security extension, always parse it as first E2E extension
-	SecExt    *layers.SPSE
+	SecExtnLayer  *layers.SPSE
 	SecExtnBuffer []byte
 
 	E2E    []*layers.Extension
@@ -72,9 +72,9 @@ func (s *scionLayer) serialize() (int, error) {
 		bAuth := gopacket.NewSerializeBuffer()
 		//special serialization for authentication
 		//must be called after normal serialization logic above
-		//assumption is that s.CmnHdr, s.HBH, s.E2E and s.SecExt all implicitly store special fields
+		//assumption is that s.CmnHdr, s.HBH, s.E2E and s.SecExtnLayer all implicitly store special fields
 		//which hold only the bytes needed for authentication,
-		//this call merely "collects" these bytes slices and arranges them together
+		//this call merely "collects" these bytes slices and arranges them in the correct order
 		err := s.serializeForAuth(hdrLen, bAuth)
 		if err != nil {
 			return 0, err
@@ -91,11 +91,12 @@ func (s *scionLayer) serialize() (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		//SecExt has a pointer to the buffer where the MAC should be stored,
+		//SecExtnLayer has a pointer to the buffer where the MAC should be stored,
 		//this is maintained by the order of the calls in this function
-		//s.SecExt.SetAuthenticator(s.AuthExt.Authenticator)
-		s.SecExt.SetAuthenticator(s.AuthExt.Authenticator)
+		s.SecExtnLayer.SetAuthenticator(s.AuthExt.Authenticator)
+		//s.SecExtnBuffer now has the serialized security extension with the MAC written in the correct location
 		copy(s.Bytes[secExtnOffset:], s.SecExtnBuffer)
+
 	}
 
 	return totalLen, nil
@@ -107,7 +108,7 @@ func (s *scionLayer) serializeForAuth(hdrLen int, b gopacket.SerializeBuffer) er
 	if err != nil {
 		return err
 	}
-	headerBytes := s.CmnHdr.AuthenticatedBytes
+	headerBytes := s.cmnHdr.AuthenticatedBytes
 	headerBytes = append(headerBytes, s.Bytes[spkt.CmnHdrLen:hdrLen]...)
 	bytes, err := b.PrependBytes(len(headerBytes))
 	if err != nil {
@@ -127,11 +128,11 @@ func (s *scionLayer) serializeExtnForAuth(b gopacket.SerializeBuffer) error {
 		}
 		copy(bytes, s.E2E[i].AuthenticatedBytes)
 	}
-	bytes, err := b.PrependBytes(len(s.SecExt.AuthenticatedBytes))
+	bytes, err := b.PrependBytes(len(s.SecExtnLayer.AuthenticatedBytes))
 	if err != nil {
 		return err
 	}
-	copy(bytes, s.SecExt.AuthenticatedBytes)
+	copy(bytes, s.SecExtnLayer.AuthenticatedBytes)
 	for i := 0; i < len(s.HBH); i++ {
 		bytes, err := b.PrependBytes(len(s.HBH[i].AuthenticatedBytes))
 		if err != nil {
@@ -146,7 +147,7 @@ func (s *scionLayer) serializeExtnForAuth(b gopacket.SerializeBuffer) error {
 
 func (s *scionLayer) serializeCommonHdr(hdrLen, totalLen int) error {
 	//still using this struct, because it's convenient and does the job
-	s.CmnHdr = spkt.CmnHdr{
+	s.cmnHdr = spkt.CmnHdr{
 		Ver:       spkt.SCIONVersion,
 		DstType:   s.Destination.Host.Type(),
 		SrcType:   s.Source.Host.Type(),
@@ -157,7 +158,7 @@ func (s *scionLayer) serializeCommonHdr(hdrLen, totalLen int) error {
 		NextHdr:   s.nextHdr[len(s.nextHdr)-1],
 	}
 
-	s.CmnHdr.Write(s.Bytes[:spkt.CmnHdrLen])
+	s.cmnHdr.Write(s.Bytes[:spkt.CmnHdrLen])
 	return nil
 }
 
@@ -173,12 +174,12 @@ func (s *scionLayer) serializeExtensions(offset int) ([]byte, []byte, int, error
 		return nil, nil, 0, err
 	}
 	if s.AuthExt != nil {
-		s.SecExt, err = layers.ExtensionDataToSPSELayer(s.nextHdr[len(s.nextHdr)-1], *s.AuthExt)
+		s.SecExtnLayer, err = layers.ExtensionDataToSPSELayer(s.nextHdr[len(s.nextHdr)-1], *s.AuthExt)
 		if err != nil {
 			return nil, nil, 0, err
 		}
-		s.SecExtnBuffer = s.SecExt.Serialize()
-		//s.SecExt.SetAuthenticator([]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255})
+		s.SecExtnBuffer = s.SecExtnLayer.Serialize()
+		//s.SecExtnLayer.SetAuthenticator([]byte{255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255})
 		s.nextHdr = append(s.nextHdr, s.AuthExt.Class())
 	}
 	hbhRaw, err := s.serializeExtensionsHelper(hbh)

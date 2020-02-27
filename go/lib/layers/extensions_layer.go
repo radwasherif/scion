@@ -81,6 +81,14 @@ func (e *Extension) DecodeFromBytes(data []byte, df gopacket.DecodeFeedback) err
 	e.Data = data[3:expectedLength]
 	e.BaseLayer.Contents = data[:expectedLength]
 	e.BaseLayer.Payload = data[expectedLength:]
+
+	//The bytes that need to be authenticated
+	switch e.Class {
+	case common.HopByHopClass:
+		e.AuthenticatedBytes = []byte{data[0], data[2]} //HBH: only next header and type
+	case common.End2EndClass: //E2E: entire extension
+		e.AuthenticatedBytes = data
+	}
 	return nil
 }
 
